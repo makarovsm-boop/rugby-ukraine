@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin-page-header";
 import { FallbackState } from "@/components/fallback-state";
+import { requireAdmin } from "@/lib/admin";
 import { formatDate, formatDateTime, getAdminDashboardData } from "@/lib/db";
 import { buildTitle } from "@/lib/seo";
 
@@ -24,6 +25,7 @@ const quickLinks = [
 ];
 
 export default async function AdminDashboardPage() {
+  await requireAdmin();
   const { stats, recentArticles, recentComments } = await getAdminDashboardData();
 
   return (
