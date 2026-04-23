@@ -1,0 +1,10 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" fill="#0F172A"/>
+  <rect x="60" y="60" width="1080" height="600" rx="40" fill="#10233F"/>
+  <circle cx="931" cy="196" r="128" fill="#14B8A6" fill-opacity="0.22"/>
+  <circle cx="263" cy="530" r="154" fill="#0F766E" fill-opacity="0.20"/>
+  <text x="116" y="180" fill="#A7F3D0" font-family="Arial, sans-serif" font-size="24" font-weight="700">ЄВРОПЕЙСЬКИЙ ТУРНІР</text>
+  <text x="116" y="300" fill="white" font-family="Arial, sans-serif" font-size="68" font-weight="700">Чемпіонат</text>
+  <text x="116" y="380" fill="white" font-family="Arial, sans-serif" font-size="68" font-weight="700">Європи</text>
+  <text x="116" y="452" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="30">Збірні, турнірна таблиця та календар матчів</text>
+</svg>

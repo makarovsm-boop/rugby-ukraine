@@ -1,0 +1,11 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" fill="#ECFDF5"/>
+  <rect x="70" y="70" width="1060" height="580" rx="40" fill="#0F766E"/>
+  <circle cx="936" cy="210" r="126" fill="#99F6E4" fill-opacity="0.24"/>
+  <circle cx="290" cy="522" r="152" fill="#CCFBF1" fill-opacity="0.22"/>
+  <rect x="126" y="126" width="208" height="42" rx="21" fill="#115E59"/>
+  <text x="153" y="154" fill="#CCFBF1" font-family="Arial, sans-serif" font-size="22" font-weight="700">ДЛЯ НОВАЧКІВ</text>
+  <text x="126" y="292" fill="white" font-family="Arial, sans-serif" font-size="64" font-weight="700">Відкриті тренування</text>
+  <text x="126" y="368" fill="white" font-family="Arial, sans-serif" font-size="64" font-weight="700">та знайомство з грою</text>
+  <text x="126" y="440" fill="#D1FAE5" font-family="Arial, sans-serif" font-size="30">Клуби розширюють спільноту регбі в Україні</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" fill="#E2E8F0"/>
+  <rect x="60" y="60" width="1080" height="600" rx="40" fill="#1E293B"/>
+  <circle cx="956" cy="186" r="128" fill="#F59E0B" fill-opacity="0.22"/>
+  <circle cx="276" cy="538" r="146" fill="#22C55E" fill-opacity="0.14"/>
+  <text x="116" y="180" fill="#FDE68A" font-family="Arial, sans-serif" font-size="24" font-weight="700">АНГЛІЙСЬКА ЛІГА</text>
+  <text x="116" y="300" fill="white" font-family="Arial, sans-serif" font-size="68" font-weight="700">Premiership</text>
+  <text x="116" y="380" fill="white" font-family="Arial, sans-serif" font-size="68" font-weight="700">Rugby</text>
+  <text x="116" y="452" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="30">Клубна боротьба за плей-оф та топові матчі туру</text>
+</svg>

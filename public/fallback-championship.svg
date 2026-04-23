@@ -1,0 +1,11 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" rx="32" fill="#3F1D0E"/>
+  <rect x="64" y="64" width="1072" height="547" rx="28" fill="#1C1917"/>
+  <path d="M256 164L290 232H358L304 276L324 352L256 308L188 352L208 276L154 232H222L256 164Z" fill="#FBBF24"/>
+  <rect x="410" y="184" width="450" height="28" rx="14" fill="#FEF3C7"/>
+  <rect x="410" y="230" width="290" height="20" rx="10" fill="#F59E0B"/>
+  <rect x="410" y="320" width="520" height="20" rx="10" fill="#FCD34D"/>
+  <rect x="410" y="356" width="460" height="20" rx="10" fill="#FCD34D"/>
+  <text x="410" y="438" fill="#FFFBEB" font-family="Arial, sans-serif" font-size="54" font-weight="700">Чемпіонат</text>
+  <text x="410" y="480" fill="#FEF3C7" font-family="Arial, sans-serif" font-size="28">Використано стандартне зображення</text>
+</svg>

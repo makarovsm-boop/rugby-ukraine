@@ -1,0 +1,25 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#F4F7FB"/>
+  <rect x="36" y="36" width="1128" height="558" rx="32" fill="url(#bg)"/>
+  <rect x="92" y="104" width="132" height="132" rx="36" fill="#020817"/>
+  <path d="M128 202V138H156.544C169.728 138 178.176 145.36 178.176 157.056C178.176 169.072 169.728 176.432 156.544 176.432H142.112V202H128ZM142.112 164.928H154.752C161.984 164.928 166.096 161.2 166.096 157.056C166.096 152.912 161.984 149.536 154.752 149.536H142.112V164.928Z" fill="white"/>
+  <path d="M192.328 202L176.872 138H189.512L198.632 182.672L210.136 138H223.128L234.536 182.672L243.656 138H256.296L240.84 202H227.944L216.632 158.048L205.224 202H192.328Z" fill="white"/>
+  <text x="92" y="324" fill="white" font-family="Georgia, 'Times New Roman', serif" font-size="74" font-weight="700">Rugby Ukraine</text>
+  <text x="92" y="388" fill="#C7D2FE" font-family="Arial, sans-serif" font-size="30">Новини, матчі, чемпіонати, команди та гравці</text>
+  <rect x="92" y="452" width="182" height="46" rx="23" fill="#0F766E"/>
+  <text x="183" y="482" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="22" font-weight="700">RUGBY UA</text>
+  <rect x="804" y="108" width="280" height="354" rx="28" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)"/>
+  <ellipse cx="944" cy="207" rx="92" ry="92" fill="rgba(255,255,255,0.08)"/>
+  <path d="M945 146C979.793 146 1008 174.207 1008 209C1008 243.793 979.793 272 945 272C910.207 272 882 243.793 882 209C882 174.207 910.207 146 945 146Z" fill="#F8FAFC"/>
+  <path d="M908 209C920 189 940 176 964 176C974 176 985 179 994 185C985 216 961 242 928 254C918 245 911 233 908 219H954L966 209L954 199H908C908 202 908 206 908 209Z" fill="#0F172A"/>
+  <text x="842" y="340" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="700">MVP site</text>
+  <text x="842" y="378" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="20">Базовий Open Graph image</text>
+  <text x="842" y="406" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="20">для всіх сторінок сайту</text>
+  <defs>
+    <linearGradient id="bg" x1="75" y1="60" x2="1129" y2="595" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="0.5" stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
+</svg>

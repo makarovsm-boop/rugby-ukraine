@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String    @id
+  name      String
+  email     String    @unique
+  password  String
+  role      String    @default("USER")
+  articles  Article[]
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Article {
+  id        String    @id
+  slug      String    @unique
+  title     String
+  excerpt   String
+  content   String
+  image     String
+  date      DateTime
+  tags      Json
+  published Boolean   @default(true)
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Team {
+  id          String   @id
+  slug        String   @unique
+  name        String
+  short       String
+  country     String
+  level       String
+  stadium     String
+  description String
+  image       String
+  players     Player[]
+  homeMatches Match[]  @relation("HomeTeamMatches")
+  awayMatches Match[]  @relation("AwayTeamMatches")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Player {
+  id        String   @id
+  slug      String   @unique
+  name      String
+  position  String
+  number    Int
+  age       Int
+  height    String
+  weight    String
+  summary   String
+  bio       String
+  image     String
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Championship {
+  id          String   @id
+  slug        String   @unique
+  title       String
+  region      String
+  format      String
+  description String
+  season      String
+  image       String
+  matches     Match[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Match {
+  id             String       @id
+  championshipId String
+  homeTeamId     String
+  awayTeamId     String
+  status         String       @default("upcoming")
+  round          String
+  date           DateTime
+  location       String
+  homeScore      Int?
+  awayScore      Int?
+  championship   Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  homeTeam       Team         @relation("HomeTeamMatches", fields: [homeTeamId], references: [id], onDelete: Cascade)
+  awayTeam       Team         @relation("AwayTeamMatches", fields: [awayTeamId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Comment {
+  id        String   @id
+  content   String
+  articleId String
+  userId    String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

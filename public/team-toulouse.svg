@@ -1,0 +1,9 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" fill="#FEE2E2"/>
+  <rect x="60" y="60" width="1080" height="600" rx="40" fill="#991B1B"/>
+  <circle cx="930" cy="190" r="126" fill="#FCA5A5" fill-opacity="0.24"/>
+  <circle cx="270" cy="530" r="150" fill="#FECACA" fill-opacity="0.18"/>
+  <text x="118" y="178" fill="#FECACA" font-family="Arial, sans-serif" font-size="24" font-weight="700">ФРАНЦІЯ</text>
+  <text x="118" y="296" fill="white" font-family="Arial, sans-serif" font-size="68" font-weight="700">Stade Toulousain</text>
+  <text x="118" y="372" fill="#FEE2E2" font-family="Arial, sans-serif" font-size="32">Яскрава атака та постійна боротьба за титули</text>
+</svg>

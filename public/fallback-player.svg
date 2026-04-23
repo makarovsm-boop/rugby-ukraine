@@ -1,0 +1,12 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" rx="32" fill="#14532D"/>
+  <rect x="64" y="64" width="1072" height="547" rx="28" fill="#052E16"/>
+  <circle cx="250" cy="240" r="84" fill="#D1FAE5"/>
+  <path d="M250 338C182 338 126 392 126 460V490H374V460C374 392 318 338 250 338Z" fill="#A7F3D0"/>
+  <rect x="430" y="176" width="380" height="28" rx="14" fill="#ECFDF5"/>
+  <rect x="430" y="222" width="250" height="20" rx="10" fill="#86EFAC"/>
+  <rect x="430" y="314" width="520" height="20" rx="10" fill="#86EFAC"/>
+  <rect x="430" y="350" width="430" height="20" rx="10" fill="#86EFAC"/>
+  <text x="430" y="438" fill="#F0FDF4" font-family="Arial, sans-serif" font-size="54" font-weight="700">Гравець</text>
+  <text x="430" y="480" fill="#DCFCE7" font-family="Arial, sans-serif" font-size="28">Профіль без окремого фото</text>
+</svg>

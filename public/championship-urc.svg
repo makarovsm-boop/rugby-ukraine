@@ -1,0 +1,10 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" fill="#ECFDF5"/>
+  <rect x="60" y="60" width="1080" height="600" rx="40" fill="#0F766E"/>
+  <circle cx="944" cy="208" r="126" fill="#99F6E4" fill-opacity="0.24"/>
+  <circle cx="258" cy="532" r="152" fill="#D1FAE5" fill-opacity="0.22"/>
+  <text x="116" y="180" fill="#CCFBF1" font-family="Arial, sans-serif" font-size="24" font-weight="700">МІЖНАРОДНИЙ ТУРНІР</text>
+  <text x="116" y="300" fill="white" font-family="Arial, sans-serif" font-size="62" font-weight="700">United Rugby</text>
+  <text x="116" y="374" fill="white" font-family="Arial, sans-serif" font-size="62" font-weight="700">Championship</text>
+  <text x="116" y="446" fill="#D1FAE5" font-family="Arial, sans-serif" font-size="30">Клуби з кількох країн в одному сезоні</text>
+</svg>

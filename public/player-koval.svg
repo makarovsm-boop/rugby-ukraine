@@ -1,0 +1,9 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" fill="#ECFDF5"/>
+  <rect x="60" y="60" width="1080" height="600" rx="40" fill="#0F766E"/>
+  <circle cx="938" cy="188" r="126" fill="#99F6E4" fill-opacity="0.24"/>
+  <circle cx="268" cy="530" r="150" fill="#D1FAE5" fill-opacity="0.18"/>
+  <text x="118" y="176" fill="#CCFBF1" font-family="Arial, sans-serif" font-size="24" font-weight="700">ГРАВЕЦЬ</text>
+  <text x="118" y="294" fill="white" font-family="Arial, sans-serif" font-size="64" font-weight="700">Іван Коваль</text>
+  <text x="118" y="370" fill="#D1FAE5" font-family="Arial, sans-serif" font-size="32">Флай-хав • Збірна України</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" rx="32" fill="#0F172A"/>
+  <rect x="64" y="64" width="1072" height="547" rx="28" fill="#111827"/>
+  <rect x="104" y="110" width="188" height="40" rx="20" fill="#065F46"/>
+  <rect x="104" y="188" width="510" height="28" rx="14" fill="#E2E8F0"/>
+  <rect x="104" y="232" width="612" height="20" rx="10" fill="#94A3B8"/>
+  <rect x="104" y="268" width="540" height="20" rx="10" fill="#94A3B8"/>
+  <rect x="104" y="440" width="270" height="72" rx="24" fill="#059669"/>
+  <text x="104" y="360" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="58" font-weight="700">Rugby Ukraine</text>
+  <text x="104" y="402" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="28">Новина без завантаженого зображення</text>
+</svg>
