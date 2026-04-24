@@ -8,7 +8,7 @@ import {
   getChampionshipBySlug,
   getChampionships,
 } from "@/lib/db";
-import { getApiRugbyStandings } from "@/lib/api-rugby";
+import { getApiRugbyStandingsResult } from "@/lib/api-rugby";
 import { FallbackState } from "@/components/fallback-state";
 import {
   getMatchStatusClasses,
@@ -84,13 +84,12 @@ export default async function ChampionshipPage({
   );
 
   const fallbackStandings = buildStandings(championship.matches);
-  const externalStandings = await getApiRugbyStandings({
+  const apiRugbyStandings = await getApiRugbyStandingsResult({
     slug: championship.slug,
     title: championship.title,
     season: championship.season,
   });
-  const standings = externalStandings ?? fallbackStandings;
-  const standingsSource = externalStandings ? "api" : "local";
+  const standings = apiRugbyStandings.rows ?? fallbackStandings;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
@@ -164,9 +163,7 @@ export default async function ChampionshipPage({
               Поточне становище команд
             </h2>
             <p className="mt-3 text-sm text-slate-500">
-              {standingsSource === "api"
-                ? "Таблиця оновлюється з API-RUGBY."
-                : "Таблиця побудована з матчів, які вже є в локальній базі сайту."}
+              {apiRugbyStandings.message}
             </p>
           </div>
 

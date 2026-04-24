@@ -18,6 +18,19 @@ export type ChampionshipStandingRow = {
   points: number;
 };
 
+export type ApiRugbyStandingsResult = {
+  rows: ChampionshipStandingRow[] | null;
+  source: "api" | "local";
+  message: string;
+};
+
+type ApiRugbyResponse = {
+  ok: boolean;
+  status: number;
+  payload: any;
+  error: string | null;
+};
+
 const API_RUGBY_BASE_URL = "https://v1.rugby.api-sports.io";
 
 const leagueSearchMap: Record<string, string> = {
@@ -106,7 +119,7 @@ function getLeagueSearchCandidates(championship: ChampionshipLike) {
 async function fetchApiRugby(
   path: string,
   searchParams: Record<string, string>,
-) {
+): Promise<ApiRugbyResponse | null> {
   const apiKey = getApiRugbyKey();
 
   if (!apiKey) {
@@ -125,20 +138,48 @@ async function fetchApiRugby(
     const response = await fetch(url.toString(), {
       headers: {
         "x-apisports-key": apiKey,
+        Accept: "application/json",
       },
       next: {
         revalidate: 1800,
       },
     });
 
-    if (!response.ok) {
-      return null;
-    }
+    const payload = await response.json().catch(() => null);
+    const apiError = extractApiError(payload);
 
-    return response.json();
+    return {
+      ok: response.ok,
+      status: response.status,
+      payload,
+      error: apiError ?? (!response.ok ? `HTTP ${response.status}` : null),
+    };
   } catch {
     return null;
   }
+}
+
+function extractApiError(payload: any) {
+  if (!payload || typeof payload !== "object") {
+    return null;
+  }
+
+  const errors = payload.errors;
+
+  if (typeof errors === "string" && errors.trim()) {
+    return errors.trim();
+  }
+
+  if (errors && typeof errors === "object") {
+    const messages = Object.values(errors)
+      .flatMap((value) => (Array.isArray(value) ? value : [value]))
+      .map((value) => String(value).trim())
+      .filter(Boolean);
+
+    return messages[0] ?? null;
+  }
+
+  return null;
 }
 
 function normalizeLeagueEntry(entry: any): ApiLeagueEntry | null {
@@ -254,27 +295,56 @@ function normalizeStandingRow(row: any): ChampionshipStandingRow | null {
   };
 }
 
-export async function getApiRugbyStandings(
+function createFallbackMessage(details?: string) {
+  if (!details) {
+    return "API-RUGBY поки не повернув таблицю для цього турніру. Тимчасово показуємо локальні дані з бази сайту.";
+  }
+
+  return `API-RUGBY поки не повернув таблицю для цього турніру (${details}). Тимчасово показуємо локальні дані з бази сайту.`;
+}
+
+export async function getApiRugbyStandingsResult(
   championship: ChampionshipLike,
-): Promise<ChampionshipStandingRow[] | null> {
+): Promise<ApiRugbyStandingsResult> {
   try {
+    const apiKey = getApiRugbyKey();
+
+    if (!apiKey) {
+      return {
+        rows: null,
+        source: "local",
+        message:
+          "API_RUGBY_KEY не налаштований, тому зараз показуємо локальну таблицю з бази сайту.",
+      };
+    }
+
     const seasons = getSeasonCandidates(championship.season);
 
     if (seasons.length === 0) {
-      return null;
+      return {
+        rows: null,
+        source: "local",
+        message: createFallbackMessage("не вдалося розпізнати сезон"),
+      };
     }
 
     const searchCandidates = getLeagueSearchCandidates(championship);
-    
+    const errors: string[] = [];
+
     for (const season of seasons) {
       let leagueId: number | null = null;
 
       for (const candidate of searchCandidates) {
-        const leaguesPayload = await fetchApiRugby("/leagues", {
+        const leaguesResponse = await fetchApiRugby("/leagues", {
           search: candidate,
           season: String(season),
         });
-        leagueId = findLeagueId(leaguesPayload, searchCandidates);
+
+        if (leaguesResponse?.error) {
+          errors.push(leaguesResponse.error);
+        }
+
+        leagueId = findLeagueId(leaguesResponse?.payload, searchCandidates);
 
         if (leagueId) {
           break;
@@ -283,10 +353,15 @@ export async function getApiRugbyStandings(
 
       if (!leagueId) {
         for (const candidate of searchCandidates) {
-          const leaguesPayload = await fetchApiRugby("/leagues", {
+          const leaguesResponse = await fetchApiRugby("/leagues", {
             search: candidate,
           });
-          leagueId = findLeagueId(leaguesPayload, searchCandidates);
+
+          if (leaguesResponse?.error) {
+            errors.push(leaguesResponse.error);
+          }
+
+          leagueId = findLeagueId(leaguesResponse?.payload, searchCandidates);
 
           if (leagueId) {
             break;
@@ -298,24 +373,65 @@ export async function getApiRugbyStandings(
         continue;
       }
 
-      const standingsPayload = await fetchApiRugby("/standings", {
+      const standingsResponse = await fetchApiRugby("/standings", {
         league: String(leagueId),
         season: String(season),
       });
 
-      const flattened = flattenStandings(standingsPayload?.response);
+      if (standingsResponse?.error) {
+        errors.push(standingsResponse.error);
+      }
+
+      const flattened = flattenStandings(standingsResponse?.payload?.response);
       const rows = flattened
         .map(normalizeStandingRow)
         .filter((row): row is ChampionshipStandingRow => Boolean(row))
         .sort((a, b) => a.position - b.position);
 
       if (rows.length > 0) {
-        return rows;
+        return {
+          rows,
+          source: "api",
+          message: "Таблиця оновлюється з API-RUGBY.",
+        };
+      }
+
+      const standingsWithoutSeason = await fetchApiRugby("/standings", {
+        league: String(leagueId),
+      });
+
+      if (standingsWithoutSeason?.error) {
+        errors.push(standingsWithoutSeason.error);
+      }
+
+      const rowsWithoutSeason = flattenStandings(
+        standingsWithoutSeason?.payload?.response,
+      )
+        .map(normalizeStandingRow)
+        .filter((row): row is ChampionshipStandingRow => Boolean(row))
+        .sort((a, b) => a.position - b.position);
+
+      if (rowsWithoutSeason.length > 0) {
+        return {
+          rows: rowsWithoutSeason,
+          source: "api",
+          message: "Таблиця оновлюється з API-RUGBY.",
+        };
       }
     }
 
-    return null;
+    const uniqueErrors = [...new Set(errors)].filter(Boolean);
+
+    return {
+      rows: null,
+      source: "local",
+      message: createFallbackMessage(uniqueErrors[0]),
+    };
   } catch {
-    return null;
+    return {
+      rows: null,
+      source: "local",
+      message: createFallbackMessage("невідома помилка інтеграції"),
+    };
   }
 }
