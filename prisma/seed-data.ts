@@ -63,6 +63,17 @@ export const championshipsSeed = [
     season: "2025/26",
     image: "/championship-urc.svg",
   },
+  {
+    id: "championship-4",
+    slug: "six-nations",
+    title: "Six Nations",
+    region: "Європа",
+    format: "Збірні",
+    description:
+      "Найпрестижніший щорічний турнір збірних Північної півкулі, де важать не лише очки в таблиці, а й історія протистоянь, стиль гри та кадрова глибина.",
+    season: "2026",
+    image: "/fallback-championship.svg",
+  },
 ];
 
 export const teamsSeed = [

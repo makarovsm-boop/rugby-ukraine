@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -21,8 +22,15 @@ export function SiteHeader() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4">
           <Link href="/" className="group flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-lg font-semibold text-white transition-transform duration-200 group-hover:scale-105">
-              UA
+            <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-slate-950 shadow-[0_10px_24px_rgba(2,8,23,0.18)] transition-transform duration-200 group-hover:scale-105">
+              <Image
+                src="/logo-rugby-ball.svg"
+                alt="Ukrainian Ruggers logo"
+                width={44}
+                height={44}
+                className="h-11 w-11"
+                priority
+              />
             </span>
             <div>
               <p className="text-lg font-semibold text-slate-950">
