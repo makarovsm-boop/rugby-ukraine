@@ -94,12 +94,12 @@ export default async function ChampionshipPage({
       </Link>
 
       <article className="content-card-strong overflow-hidden rounded-[2rem]">
-        <div className="relative aspect-[16/7]">
+        <div className="relative aspect-[16/7] bg-white">
           <Image
             src={safeImage}
             alt={championship.title}
             fill
-            className="object-cover"
+            className="object-contain p-6 sm:p-8"
             priority
             sizes="(max-width: 640px) 100vw, (max-width: 1280px) 92vw, 1120px"
           />

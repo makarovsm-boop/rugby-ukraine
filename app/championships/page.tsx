@@ -93,12 +93,12 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
               key={championship.slug}
               className="content-card overflow-hidden rounded-[1.5rem]"
             >
-              <div className="relative aspect-[16/10]">
+              <div className="relative aspect-[16/10] bg-white">
                 <Image
                   src={safeImage}
                   alt={championship.title}
                   fill
-                  className="object-cover"
+                  className="object-contain p-5"
                   priority={index === 0}
                   sizes="(max-width: 1024px) 100vw, 33vw"
                 />
