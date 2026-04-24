@@ -4,6 +4,11 @@ type ChampionshipLike = {
   season: string;
 };
 
+type ApiLeagueEntry = {
+  id: number;
+  name: string;
+};
+
 export type ChampionshipStandingRow = {
   position: number;
   name: string;
@@ -52,6 +57,31 @@ function getLeagueSearchTerm(championship: ChampionshipLike) {
   return championship.title;
 }
 
+function getLeagueSearchCandidates(championship: ChampionshipLike) {
+  const primary = getLeagueSearchTerm(championship);
+  const candidates = new Set<string>([primary, championship.title]);
+
+  if (championship.slug === "united-rugby-championship") {
+    candidates.add("United Rugby Championship");
+    candidates.add("URC");
+  }
+
+  if (championship.slug === "six-nations") {
+    candidates.add("Six Nations");
+  }
+
+  if (
+    championship.slug === "investec-champions-cup" ||
+    championship.slug === "champions-cup"
+  ) {
+    candidates.add("European Rugby Champions Cup");
+    candidates.add("Champions Cup");
+    candidates.add("Investec Champions Cup");
+  }
+
+  return [...candidates].filter(Boolean);
+}
+
 async function fetchApiRugby(
   path: string,
   searchParams: Record<string, string>,
@@ -90,23 +120,63 @@ async function fetchApiRugby(
   }
 }
 
-function extractLeagueId(payload: any) {
-  const response = Array.isArray(payload?.response) ? payload.response : [];
-  const firstItem = response[0];
-
-  if (!firstItem || typeof firstItem !== "object") {
+function normalizeLeagueEntry(entry: any): ApiLeagueEntry | null {
+  if (!entry || typeof entry !== "object") {
     return null;
   }
 
-  if (typeof firstItem?.league?.id === "number") {
-    return firstItem.league.id;
+  const id =
+    typeof entry?.league?.id === "number"
+      ? entry.league.id
+      : typeof entry?.id === "number"
+        ? entry.id
+        : null;
+
+  const name = String(entry?.league?.name ?? entry?.name ?? "").trim();
+
+  if (!id || !name) {
+    return null;
   }
 
-  if (typeof firstItem?.id === "number") {
-    return firstItem.id;
+  return {
+    id,
+    name,
+  };
+}
+
+function findLeagueId(payload: any, searchCandidates: string[]) {
+  const response = Array.isArray(payload?.response) ? payload.response : [];
+  const leagues = response
+    .map(normalizeLeagueEntry)
+    .filter((entry: ApiLeagueEntry | null): entry is ApiLeagueEntry => Boolean(entry));
+
+  if (leagues.length === 0) {
+    return null;
   }
 
-  return null;
+  const normalizedCandidates = searchCandidates.map((candidate) =>
+    candidate.trim().toLowerCase(),
+  );
+
+  const exactMatch = leagues.find((league: ApiLeagueEntry) =>
+    normalizedCandidates.includes(league.name.toLowerCase()),
+  );
+
+  if (exactMatch) {
+    return exactMatch.id;
+  }
+
+  const partialMatch = leagues.find((league: ApiLeagueEntry) =>
+    normalizedCandidates.some((candidate: string) =>
+      league.name.toLowerCase().includes(candidate),
+    ),
+  );
+
+  if (partialMatch) {
+    return partialMatch.id;
+  }
+
+  return leagues[0]?.id ?? null;
 }
 
 function flattenStandings(input: any): any[] {
@@ -173,12 +243,33 @@ export async function getApiRugbyStandings(
       return null;
     }
 
-    const search = getLeagueSearchTerm(championship);
-    const leaguesPayload = await fetchApiRugby("/leagues", {
-      search,
-      season: String(season),
-    });
-    const leagueId = extractLeagueId(leaguesPayload);
+    const searchCandidates = getLeagueSearchCandidates(championship);
+    let leagueId: number | null = null;
+
+    for (const candidate of searchCandidates) {
+      const leaguesPayload = await fetchApiRugby("/leagues", {
+        search: candidate,
+        season: String(season),
+      });
+      leagueId = findLeagueId(leaguesPayload, searchCandidates);
+
+      if (leagueId) {
+        break;
+      }
+    }
+
+    if (!leagueId) {
+      for (const candidate of searchCandidates) {
+        const leaguesPayload = await fetchApiRugby("/leagues", {
+          search: candidate,
+        });
+        leagueId = findLeagueId(leaguesPayload, searchCandidates);
+
+        if (leagueId) {
+          break;
+        }
+      }
+    }
 
     if (!leagueId) {
       return null;
