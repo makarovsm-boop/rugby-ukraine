@@ -7,7 +7,7 @@ import {
   redirectWithFormError,
   redirectWithFormSuccess,
 } from "@/lib/admin-form-errors";
-import { resolveImageUpload } from "@/lib/uploads";
+import { resolveImageUpload, UploadStorageError } from "@/lib/uploads";
 import { createPlayerId, createSlug, requireAdmin } from "@/lib/admin";
 
 export async function createPlayer(formData: FormData) {
@@ -22,10 +22,20 @@ export async function createPlayer(formData: FormData) {
   const summary = String(formData.get("summary") ?? "").trim();
   const bio = String(formData.get("bio") ?? "").trim();
   const teamId = String(formData.get("teamId") ?? "").trim();
-  const image = await resolveImageUpload({
-    formData,
-    folder: "players",
-  });
+  let image: string;
+
+  try {
+    image = await resolveImageUpload({
+      formData,
+      folder: "players",
+    });
+  } catch (error) {
+    if (error instanceof UploadStorageError) {
+      redirectWithFormError("/admin/players", error.message);
+    }
+
+    throw error;
+  }
 
   if (
     !name ||
@@ -96,11 +106,21 @@ export async function updatePlayer(slug: string, formData: FormData) {
     where: { slug },
     select: { image: true },
   });
-  const image = await resolveImageUpload({
-    formData,
-    folder: "players",
-    fallbackImage: currentPlayer?.image ?? "",
-  });
+  let image: string;
+
+  try {
+    image = await resolveImageUpload({
+      formData,
+      folder: "players",
+      fallbackImage: currentPlayer?.image ?? "",
+    });
+  } catch (error) {
+    if (error instanceof UploadStorageError) {
+      redirectWithFormError(`/admin/players/${slug}`, error.message);
+    }
+
+    throw error;
+  }
 
   if (
     !name ||

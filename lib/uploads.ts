@@ -3,6 +3,13 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { normalizeImagePath } from "@/lib/media-config";
 
+export class UploadStorageError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UploadStorageError";
+  }
+}
+
 function getUploadExtension(file: File) {
   const originalName = file.name.trim();
   const parsedExtension = path.extname(originalName).toLowerCase();
@@ -39,6 +46,12 @@ export async function resolveImageUpload({
   const file = formData.get("imageFile");
 
   if (file instanceof File && file.size > 0) {
+    if (process.env.VERCEL) {
+      throw new UploadStorageError(
+        "Завантаження нового файлу в production поки не налаштоване. Тимчасово вкажіть готовий шлях до зображення в полі вище або підключіть окреме сховище для файлів.",
+      );
+    }
+
     const extension = getUploadExtension(file);
     const fileName = `${randomUUID()}${extension}`;
     const relativeDir = path.posix.join("uploads", folder);

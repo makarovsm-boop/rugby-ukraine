@@ -7,7 +7,7 @@ import {
   redirectWithFormError,
   redirectWithFormSuccess,
 } from "@/lib/admin-form-errors";
-import { resolveImageUpload } from "@/lib/uploads";
+import { resolveImageUpload, UploadStorageError } from "@/lib/uploads";
 import {
   createChampionshipId,
   createSlug,
@@ -22,10 +22,20 @@ export async function createChampionship(formData: FormData) {
   const format = String(formData.get("format") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const season = String(formData.get("season") ?? "").trim();
-  const image = await resolveImageUpload({
-    formData,
-    folder: "championships",
-  });
+  let image: string;
+
+  try {
+    image = await resolveImageUpload({
+      formData,
+      folder: "championships",
+    });
+  } catch (error) {
+    if (error instanceof UploadStorageError) {
+      redirectWithFormError("/admin/championships", error.message);
+    }
+
+    throw error;
+  }
 
   if (!title || !region || !format || !description || !season) {
     redirectWithFormError(
@@ -75,11 +85,21 @@ export async function updateChampionship(slug: string, formData: FormData) {
     where: { slug },
     select: { image: true },
   });
-  const image = await resolveImageUpload({
-    formData,
-    folder: "championships",
-    fallbackImage: currentChampionship?.image ?? "",
-  });
+  let image: string;
+
+  try {
+    image = await resolveImageUpload({
+      formData,
+      folder: "championships",
+      fallbackImage: currentChampionship?.image ?? "",
+    });
+  } catch (error) {
+    if (error instanceof UploadStorageError) {
+      redirectWithFormError(`/admin/championships/${slug}`, error.message);
+    }
+
+    throw error;
+  }
 
   if (!title || !region || !format || !description || !season) {
     redirectWithFormError(

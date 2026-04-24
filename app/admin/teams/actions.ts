@@ -7,7 +7,7 @@ import {
   redirectWithFormError,
   redirectWithFormSuccess,
 } from "@/lib/admin-form-errors";
-import { resolveImageUpload } from "@/lib/uploads";
+import { resolveImageUpload, UploadStorageError } from "@/lib/uploads";
 import { createSlug, createTeamId, requireAdmin } from "@/lib/admin";
 
 export async function createTeam(formData: FormData) {
@@ -19,10 +19,20 @@ export async function createTeam(formData: FormData) {
   const level = String(formData.get("level") ?? "").trim();
   const stadium = String(formData.get("stadium") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  const image = await resolveImageUpload({
-    formData,
-    folder: "teams",
-  });
+  let image: string;
+
+  try {
+    image = await resolveImageUpload({
+      formData,
+      folder: "teams",
+    });
+  } catch (error) {
+    if (error instanceof UploadStorageError) {
+      redirectWithFormError("/admin/teams", error.message);
+    }
+
+    throw error;
+  }
 
   if (!name || !short || !country || !level || !stadium || !description) {
     redirectWithFormError(
@@ -74,11 +84,21 @@ export async function updateTeam(slug: string, formData: FormData) {
     where: { slug },
     select: { image: true },
   });
-  const image = await resolveImageUpload({
-    formData,
-    folder: "teams",
-    fallbackImage: currentTeam?.image ?? "",
-  });
+  let image: string;
+
+  try {
+    image = await resolveImageUpload({
+      formData,
+      folder: "teams",
+      fallbackImage: currentTeam?.image ?? "",
+    });
+  } catch (error) {
+    if (error instanceof UploadStorageError) {
+      redirectWithFormError(`/admin/teams/${slug}`, error.message);
+    }
+
+    throw error;
+  }
 
   if (!name || !short || !country || !level || !stadium || !description) {
     redirectWithFormError(

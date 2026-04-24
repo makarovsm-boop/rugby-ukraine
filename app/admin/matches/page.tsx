@@ -177,7 +177,7 @@ export default async function AdminMatchesPage({
               <div className="flex gap-3">
                 <Link
                   href={`/admin/matches/${match.id}`}
-                  className="inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                  className="dark-pill-button inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
                 >
                   Редагувати
                 </Link>

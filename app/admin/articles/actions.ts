@@ -6,7 +6,7 @@ import {
   redirectWithFormError,
   redirectWithFormSuccess,
 } from "@/lib/admin-form-errors";
-import { resolveImageUpload } from "@/lib/uploads";
+import { resolveImageUpload, UploadStorageError } from "@/lib/uploads";
 import {
   createArticleId,
   createSlug,
@@ -30,10 +30,20 @@ export async function createArticle(formData: FormData) {
   const date = String(formData.get("date") ?? "").trim();
   const tags = String(formData.get("tags") ?? "").trim();
   const published = formData.get("published") === "on";
-  const image = await resolveImageUpload({
-    formData,
-    folder: "articles",
-  });
+  let image: string;
+
+  try {
+    image = await resolveImageUpload({
+      formData,
+      folder: "articles",
+    });
+  } catch (error) {
+    if (error instanceof UploadStorageError) {
+      redirectWithFormError("/admin/articles", error.message);
+    }
+
+    throw error;
+  }
 
   if (!title || !excerpt || !content || !date) {
     redirectWithFormError(
@@ -93,11 +103,21 @@ export async function updateArticle(slug: string, formData: FormData) {
     where: { slug },
     select: { image: true },
   });
-  const image = await resolveImageUpload({
-    formData,
-    folder: "articles",
-    fallbackImage: currentArticle?.image ?? "",
-  });
+  let image: string;
+
+  try {
+    image = await resolveImageUpload({
+      formData,
+      folder: "articles",
+      fallbackImage: currentArticle?.image ?? "",
+    });
+  } catch (error) {
+    if (error instanceof UploadStorageError) {
+      redirectWithFormError(`/admin/articles/${slug}`, error.message);
+    }
+
+    throw error;
+  }
 
   if (!title || !excerpt || !content || !date) {
     redirectWithFormError(
