@@ -24,7 +24,7 @@ export function SiteHeader() {
           <Link href="/" className="group flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-slate-950 shadow-[0_10px_24px_rgba(2,8,23,0.18)] transition-transform duration-200 group-hover:scale-105">
               <Image
-                src="/logo-rugby-ball.svg"
+                src="/logo-rugby-ball-classic.svg"
                 alt="Ukrainian Ruggers logo"
                 width={44}
                 height={44}
