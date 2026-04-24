@@ -32,6 +32,7 @@ type ApiRugbyResponse = {
 };
 
 const API_RUGBY_BASE_URL = "https://v1.rugby.api-sports.io";
+const SCRUMBASE_BASE_URL = "https://scrumbase.app/api";
 
 const leagueSearchMap: Record<string, string> = {
   "six-nations": "Six Nations",
@@ -138,6 +139,38 @@ async function fetchApiRugby(
     const response = await fetch(url.toString(), {
       headers: {
         "x-apisports-key": apiKey,
+        Accept: "application/json",
+      },
+      next: {
+        revalidate: 1800,
+      },
+    });
+
+    const payload = await response.json().catch(() => null);
+    const apiError = extractApiError(payload);
+
+    return {
+      ok: response.ok,
+      status: response.status,
+      payload,
+      error: apiError ?? (!response.ok ? `HTTP ${response.status}` : null),
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchScrumbaseStandings(
+  league: string,
+  season: string,
+): Promise<ApiRugbyResponse | null> {
+  const url = new URL("/standings", SCRUMBASE_BASE_URL);
+  url.searchParams.set("league", league);
+  url.searchParams.set("season", season);
+
+  try {
+    const response = await fetch(url.toString(), {
+      headers: {
         Accept: "application/json",
       },
       next: {
@@ -270,6 +303,10 @@ function flattenStandings(input: any): any[] {
     return flattenStandings(input.table);
   }
 
+  if ("data" in input) {
+    return flattenStandings(input.data);
+  }
+
   return [];
 }
 
@@ -297,10 +334,10 @@ function normalizeStandingRow(row: any): ChampionshipStandingRow | null {
 
 function createFallbackMessage(details?: string) {
   if (!details) {
-    return "API-RUGBY поки не повернув таблицю для цього турніру. Тимчасово показуємо локальні дані з бази сайту.";
+    return "Зовнішні джерела поки не повернули таблицю для цього турніру. Тимчасово показуємо локальні дані з бази сайту.";
   }
 
-  return `API-RUGBY поки не повернув таблицю для цього турніру (${details}). Тимчасово показуємо локальні дані з бази сайту.`;
+  return `Зовнішні джерела поки не повернули таблицю для цього турніру (${details}). Тимчасово показуємо локальні дані з бази сайту.`;
 }
 
 export async function getApiRugbyStandingsResult(
@@ -417,6 +454,32 @@ export async function getApiRugbyStandingsResult(
           source: "api",
           message: "Таблиця оновлюється з API-RUGBY.",
         };
+      }
+    }
+
+    for (const season of seasons) {
+      for (const candidate of searchCandidates) {
+        const scrumbaseResponse = await fetchScrumbaseStandings(
+          candidate,
+          String(season),
+        );
+
+        if (scrumbaseResponse?.error) {
+          errors.push(`Scrumbase: ${scrumbaseResponse.error}`);
+        }
+
+        const scrumbaseRows = flattenStandings(scrumbaseResponse?.payload)
+          .map(normalizeStandingRow)
+          .filter((row): row is ChampionshipStandingRow => Boolean(row))
+          .sort((a, b) => a.position - b.position);
+
+        if (scrumbaseRows.length > 0) {
+          return {
+            rows: scrumbaseRows,
+            source: "api",
+            message: "Таблиця оновлюється із зовнішнього джерела Scrumbase.",
+          };
+        }
       }
     }
 
