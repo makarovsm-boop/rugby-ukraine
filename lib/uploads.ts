@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { put } from "@vercel/blob";
 import { normalizeImagePath } from "@/lib/media-config";
 
 export class UploadStorageError extends Error {
@@ -46,9 +47,22 @@ export async function resolveImageUpload({
   const file = formData.get("imageFile");
 
   if (file instanceof File && file.size > 0) {
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+
+    if (blobToken) {
+      const extension = getUploadExtension(file);
+      const pathname = `${folder}/${randomUUID()}${extension}`;
+      const blob = await put(pathname, file, {
+        access: "public",
+        token: blobToken,
+      });
+
+      return blob.url;
+    }
+
     if (process.env.VERCEL) {
       throw new UploadStorageError(
-        "Завантаження нового файлу в production поки не налаштоване. Тимчасово вкажіть готовий шлях до зображення в полі вище або підключіть окреме сховище для файлів.",
+        "Для завантаження нового файлу в production потрібно підключити Vercel Blob і додати BLOB_READ_WRITE_TOKEN у змінні середовища проєкту.",
       );
     }
 

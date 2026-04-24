@@ -45,7 +45,7 @@ export function AdminImageField({
       ? "Прев'ю вказаного шляху"
       : "Fallback-зображення";
   const previewHint = previewUrl
-    ? "Після збереження файл буде завантажено в public/uploads."
+    ? "Після збереження файл буде завантажено у production storage або в локальну папку uploads."
     : manualPath.trim()
       ? "Якщо такого файлу немає у public, на сайті автоматично спрацює fallback."
       : "Якщо шлях або файл не вказані, буде використано стандартне fallback-зображення.";
