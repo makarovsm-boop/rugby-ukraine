@@ -5,7 +5,7 @@ function normalizeSiteUrl(url?: string) {
 }
 
 export const siteConfig = {
-  name: "Rugby Ukraine",
+  name: "Ukrainian Ruggers",
   url: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
   description:
     "Український MVP сайту про регбі: новини, чемпіонати, команди, гравці та матеріали для новачків.",

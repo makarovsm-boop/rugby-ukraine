@@ -5,8 +5,8 @@ import { LoginForm } from "@/app/login/login-form";
 import { authOptions } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "Вхід | Rugby Ukraine",
-  description: "Сторінка входу в Rugby Ukraine.",
+  title: "Вхід | Ukrainian Ruggers",
+  description: "Сторінка входу в Ukrainian Ruggers.",
   robots: {
     index: false,
     follow: false,
@@ -36,7 +36,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           Авторизація
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-          Увійти в Rugby Ukraine
+          Увійти в Ukrainian Ruggers
         </h1>
         <p className="mt-4 text-base leading-8 text-slate-600">
           Вхід працює через email і пароль на базі користувачів у Prisma.

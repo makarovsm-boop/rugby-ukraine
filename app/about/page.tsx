@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/page-intro";
 
 export const metadata: Metadata = {
-  title: "Про проєкт | Rugby Ukraine",
-  description: "Інформація про редакційний проєкт Rugby Ukraine та його основні розділи.",
+  title: "Про проєкт | Ukrainian Ruggers",
+  description: "Інформація про редакційний проєкт Ukrainian Ruggers та його основні розділи.",
   alternates: {
     canonical: "/about",
   },
@@ -14,7 +14,7 @@ export default function AboutPage() {
     <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
       <PageIntro
         title="Про проєкт"
-        description="Rugby Ukraine - це український редакційний проєкт про регбі. Ми збираємо новини, матчі, команди, гравців і базові пояснення так, щоб сайт був корисним і для тих, хто давно стежить за грою, і для тих, хто тільки входить у тему."
+        description="Ukrainian Ruggers - це український редакційний проєкт про регбі. Ми збираємо новини, матчі, команди, гравців і базові пояснення так, щоб сайт був корисним і для тих, хто давно стежить за грою, і для тих, хто тільки входить у тему."
       />
 
       <section className="content-card mt-8 rounded-[1.5rem] p-6 text-sm leading-7 text-slate-600">

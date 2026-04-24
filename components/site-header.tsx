@@ -26,7 +26,7 @@ export function SiteHeader() {
             </span>
             <div>
               <p className="text-lg font-semibold text-slate-950">
-                Rugby Ukraine
+                Ukrainian Ruggers
               </p>
               <p className="hidden text-sm text-slate-500 sm:block">
                 Новини, матчі, команди, гравці

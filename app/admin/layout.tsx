@@ -24,7 +24,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
           <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                Панель керування Rugby Ukraine
+                Панель керування Ukrainian Ruggers
               </h1>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
                 Єдиний простір для редакційної роботи: контент, матчі, команди,
