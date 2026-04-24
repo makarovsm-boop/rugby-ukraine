@@ -22,13 +22,13 @@ export function SiteHeader() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4">
           <Link href="/" className="group flex items-center gap-3">
-            <span className="flex h-11 w-[4.25rem] items-center justify-center overflow-hidden rounded-[1.15rem] bg-slate-950 px-1 shadow-[0_10px_24px_rgba(2,8,23,0.18)] transition-transform duration-200 group-hover:scale-105">
+            <span className="flex h-10 w-[4.9rem] items-center justify-center transition-transform duration-200 group-hover:scale-105">
               <Image
                 src="/logo-rugby-ball-classic.svg"
                 alt="Ukrainian Ruggers logo"
-                width={68}
-                height={44}
-                className="h-11 w-auto"
+                width={78}
+                height={42}
+                className="h-10 w-auto"
                 priority
               />
             </span>
