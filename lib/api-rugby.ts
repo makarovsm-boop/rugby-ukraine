@@ -33,10 +33,31 @@ function getApiRugbyKey() {
   return process.env.API_RUGBY_KEY?.trim() || "";
 }
 
-function parseSeasonStart(season: string) {
-  const match = season.match(/\d{4}/);
+function getSeasonCandidates(season: string) {
+  const fourDigitYears = [...season.matchAll(/\d{4}/g)].map((match) =>
+    Number(match[0]),
+  );
 
-  return match ? Number(match[0]) : null;
+  if (fourDigitYears.length >= 2) {
+    return [...new Set(fourDigitYears)];
+  }
+
+  const splitYears = [...season.matchAll(/\b(\d{4})\s*\/\s*(\d{2})\b/g)].flatMap(
+    (match) => {
+      const startYear = Number(match[1]);
+      const endYearSuffix = Number(match[2]);
+      const centuryBase = Math.floor(startYear / 100) * 100;
+      const endYear = centuryBase + endYearSuffix;
+
+      return [startYear, endYear];
+    },
+  );
+
+  const candidates = [...new Set([...fourDigitYears, ...splitYears])].filter(
+    (year) => Number.isFinite(year) && year > 0,
+  );
+
+  return candidates;
 }
 
 function getLeagueSearchTerm(championship: ChampionshipLike) {
@@ -237,31 +258,21 @@ export async function getApiRugbyStandings(
   championship: ChampionshipLike,
 ): Promise<ChampionshipStandingRow[] | null> {
   try {
-    const season = parseSeasonStart(championship.season);
+    const seasons = getSeasonCandidates(championship.season);
 
-    if (!season) {
+    if (seasons.length === 0) {
       return null;
     }
 
     const searchCandidates = getLeagueSearchCandidates(championship);
-    let leagueId: number | null = null;
+    
+    for (const season of seasons) {
+      let leagueId: number | null = null;
 
-    for (const candidate of searchCandidates) {
-      const leaguesPayload = await fetchApiRugby("/leagues", {
-        search: candidate,
-        season: String(season),
-      });
-      leagueId = findLeagueId(leaguesPayload, searchCandidates);
-
-      if (leagueId) {
-        break;
-      }
-    }
-
-    if (!leagueId) {
       for (const candidate of searchCandidates) {
         const leaguesPayload = await fetchApiRugby("/leagues", {
           search: candidate,
+          season: String(season),
         });
         leagueId = findLeagueId(leaguesPayload, searchCandidates);
 
@@ -269,24 +280,41 @@ export async function getApiRugbyStandings(
           break;
         }
       }
+
+      if (!leagueId) {
+        for (const candidate of searchCandidates) {
+          const leaguesPayload = await fetchApiRugby("/leagues", {
+            search: candidate,
+          });
+          leagueId = findLeagueId(leaguesPayload, searchCandidates);
+
+          if (leagueId) {
+            break;
+          }
+        }
+      }
+
+      if (!leagueId) {
+        continue;
+      }
+
+      const standingsPayload = await fetchApiRugby("/standings", {
+        league: String(leagueId),
+        season: String(season),
+      });
+
+      const flattened = flattenStandings(standingsPayload?.response);
+      const rows = flattened
+        .map(normalizeStandingRow)
+        .filter((row): row is ChampionshipStandingRow => Boolean(row))
+        .sort((a, b) => a.position - b.position);
+
+      if (rows.length > 0) {
+        return rows;
+      }
     }
 
-    if (!leagueId) {
-      return null;
-    }
-
-    const standingsPayload = await fetchApiRugby("/standings", {
-      league: String(leagueId),
-      season: String(season),
-    });
-
-    const flattened = flattenStandings(standingsPayload?.response);
-    const rows = flattened
-      .map(normalizeStandingRow)
-      .filter((row): row is ChampionshipStandingRow => Boolean(row))
-      .sort((a, b) => a.position - b.position);
-
-    return rows.length > 0 ? rows : null;
+    return null;
   } catch {
     return null;
   }
