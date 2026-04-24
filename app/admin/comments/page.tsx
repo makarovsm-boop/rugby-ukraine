@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { deleteComment } from "@/app/admin/comments/actions";
 import { AdminPageHeader } from "@/components/admin-page-header";
+import { adminNeutralButtonClass } from "@/components/admin-form-field";
 import {
   formatDateTime,
   getAdminCommentsFilters,
@@ -153,13 +154,13 @@ export default async function AdminCommentsPage({
                 <div className="flex gap-3">
                   <Link
                     href={`/news/${comment.article.slug}`}
-                    className="inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
+                    className={adminNeutralButtonClass}
                   >
                     Відкрити статтю
                   </Link>
                   <Link
                     href={`/admin/articles/${comment.article.slug}`}
-                    className="inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                    className="dark-pill-button inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
                   >
                     До статті в адмінці
                   </Link>

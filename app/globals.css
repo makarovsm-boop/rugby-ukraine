@@ -113,6 +113,12 @@ a {
     box-shadow: 0 10px 24px rgba(2, 8, 23, 0.22);
   }
 
+  .dark-pill-button:hover,
+  .dark-pill-button:visited,
+  .dark-pill-button:active {
+    color: #ffffff !important;
+  }
+
   .skip-link {
     position: absolute;
     left: 1rem;
