@@ -10,6 +10,11 @@ export const siteConfig = {
   description:
     "Український MVP сайту про регбі: новини, чемпіонати, команди, гравці та матеріали для новачків.",
   ogImage: "/og-default.svg",
+  socialLinks: {
+    facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() || "",
+    instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() || "",
+    discord: process.env.NEXT_PUBLIC_DISCORD_URL?.trim() || "",
+  },
 };
 
 export function buildTitle(title?: string) {

@@ -4,11 +4,26 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { canAccessAdminPanel, getDefaultAdminHref } from "@/lib/roles";
 
-export function AuthControls() {
+type AuthControlsProps = {
+  variant?: "desktop" | "drawer";
+  onNavigate?: () => void;
+};
+
+export function AuthControls({
+  variant = "desktop",
+  onNavigate,
+}: AuthControlsProps) {
   const { data: session } = useSession();
+  const isDrawer = variant === "drawer";
 
   return (
-    <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+    <div
+      className={
+        isDrawer
+          ? "flex flex-col gap-3 border-t border-slate-200 pt-5"
+          : "flex flex-col gap-3 border-t border-slate-200 pt-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between"
+      }
+    >
       <div className="text-sm text-slate-600">
         {session?.user ? (
           <span>
@@ -20,17 +35,27 @@ export function AuthControls() {
       </div>
 
       {session?.user ? (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className={isDrawer ? "grid gap-2" : "flex flex-wrap items-center gap-3"}>
           <Link
             href="/profile"
-            className="inline-flex min-h-10 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
+            onClick={onNavigate}
+            className={
+              isDrawer
+                ? "inline-flex min-h-11 items-center rounded-[1.1rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
+                : "inline-flex min-h-10 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
+            }
           >
             Профіль
           </Link>
           {canAccessAdminPanel(session.user.role) ? (
             <Link
               href={getDefaultAdminHref(session.user.role)}
-              className="dark-pill-button inline-flex min-h-10 rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
+              onClick={onNavigate}
+              className={
+                isDrawer
+                  ? "dark-pill-button inline-flex min-h-11 items-center rounded-[1.1rem] px-4 py-3 text-sm font-semibold transition-colors hover:bg-slate-800"
+                  : "dark-pill-button inline-flex min-h-10 rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
+              }
             >
               Адмінка
             </Link>
@@ -38,7 +63,11 @@ export function AuthControls() {
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="inline-flex min-h-10 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
+            className={
+              isDrawer
+                ? "inline-flex min-h-11 items-center rounded-[1.1rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
+                : "inline-flex min-h-10 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
+            }
           >
             Вийти
           </button>
@@ -46,7 +75,12 @@ export function AuthControls() {
       ) : (
         <Link
           href="/login"
-          className="dark-pill-button inline-flex min-h-10 rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
+          onClick={onNavigate}
+          className={
+            isDrawer
+              ? "dark-pill-button inline-flex min-h-11 items-center rounded-[1.1rem] px-4 py-3 text-sm font-semibold transition-colors hover:bg-slate-800"
+              : "dark-pill-button inline-flex min-h-10 rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
+          }
         >
           Увійти
         </Link>
