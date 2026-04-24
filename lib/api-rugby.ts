@@ -70,20 +70,24 @@ async function fetchApiRugby(
     }
   }
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      "x-apisports-key": apiKey,
-    },
-    next: {
-      revalidate: 1800,
-    },
-  });
+  try {
+    const response = await fetch(url.toString(), {
+      headers: {
+        "x-apisports-key": apiKey,
+      },
+      next: {
+        revalidate: 1800,
+      },
+    });
 
-  if (!response.ok) {
+    if (!response.ok) {
+      return null;
+    }
+
+    return response.json();
+  } catch {
     return null;
   }
-
-  return response.json();
 }
 
 function extractLeagueId(payload: any) {
@@ -162,33 +166,37 @@ function normalizeStandingRow(row: any): ChampionshipStandingRow | null {
 export async function getApiRugbyStandings(
   championship: ChampionshipLike,
 ): Promise<ChampionshipStandingRow[] | null> {
-  const season = parseSeasonStart(championship.season);
+  try {
+    const season = parseSeasonStart(championship.season);
 
-  if (!season) {
+    if (!season) {
+      return null;
+    }
+
+    const search = getLeagueSearchTerm(championship);
+    const leaguesPayload = await fetchApiRugby("/leagues", {
+      search,
+      season: String(season),
+    });
+    const leagueId = extractLeagueId(leaguesPayload);
+
+    if (!leagueId) {
+      return null;
+    }
+
+    const standingsPayload = await fetchApiRugby("/standings", {
+      league: String(leagueId),
+      season: String(season),
+    });
+
+    const flattened = flattenStandings(standingsPayload?.response);
+    const rows = flattened
+      .map(normalizeStandingRow)
+      .filter((row): row is ChampionshipStandingRow => Boolean(row))
+      .sort((a, b) => a.position - b.position);
+
+    return rows.length > 0 ? rows : null;
+  } catch {
     return null;
   }
-
-  const search = getLeagueSearchTerm(championship);
-  const leaguesPayload = await fetchApiRugby("/leagues", {
-    search,
-    season: String(season),
-  });
-  const leagueId = extractLeagueId(leaguesPayload);
-
-  if (!leagueId) {
-    return null;
-  }
-
-  const standingsPayload = await fetchApiRugby("/standings", {
-    league: String(leagueId),
-    season: String(season),
-  });
-
-  const flattened = flattenStandings(standingsPayload?.response);
-  const rows = flattened
-    .map(normalizeStandingRow)
-    .filter((row): row is ChampionshipStandingRow => Boolean(row))
-    .sort((a, b) => a.position - b.position);
-
-  return rows.length > 0 ? rows : null;
 }
