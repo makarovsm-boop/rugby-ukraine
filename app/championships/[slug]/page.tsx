@@ -9,6 +9,7 @@ import {
   getChampionships,
 } from "@/lib/db";
 import { getApiRugbyStandingsResult } from "@/lib/api-rugby";
+import { championships as championshipOverrides } from "@/lib/championship-data";
 import { FallbackState } from "@/components/fallback-state";
 import {
   getMatchStatusClasses,
@@ -82,6 +83,9 @@ export default async function ChampionshipPage({
     championship.image,
     "championships",
   );
+  const championshipOverride = championshipOverrides.find(
+    (entry) => entry.slug === championship.slug,
+  );
 
   const fallbackStandings = buildStandings(championship.matches);
   const apiRugbyStandings = await getApiRugbyStandingsResult({
@@ -89,7 +93,15 @@ export default async function ChampionshipPage({
     title: championship.title,
     season: championship.season,
   });
-  const standings = apiRugbyStandings.rows ?? fallbackStandings;
+  const standings =
+    championshipOverride?.standings.length
+      ? championshipOverride.standings
+      : apiRugbyStandings.rows ?? fallbackStandings;
+  const championshipMatchesOverride = championshipOverride?.matches ?? [];
+  const standingsMessage =
+    championshipOverride?.standings.length
+      ? "Таблиця оновлена редакцією за актуальними зовнішніми даними і використовується як ручний override для цього турніру."
+      : apiRugbyStandings.message;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
@@ -163,7 +175,7 @@ export default async function ChampionshipPage({
               Поточне становище команд
             </h2>
             <p className="mt-3 text-sm text-slate-500">
-              {apiRugbyStandings.message}
+              {standingsMessage}
             </p>
           </div>
 
@@ -223,7 +235,30 @@ export default async function ChampionshipPage({
             </h2>
           </div>
 
-          {championship.matches.length > 0 ? (
+          {championshipMatchesOverride.length > 0 ? (
+            <div className="space-y-4">
+              {championshipMatchesOverride.map((match) => (
+                <article
+                  key={`${match.round}-${match.teams}`}
+                  className="content-card rounded-[1.5rem] p-5"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-sm text-slate-500">{match.round}</p>
+                    <span className="rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+                      Редакційне оновлення
+                    </span>
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    <h3 className="text-xl font-semibold leading-tight text-slate-950">
+                      {match.teams}
+                    </h3>
+                    <p className="text-sm text-slate-600">{match.date}</p>
+                    <p className="text-sm text-slate-500">{match.location}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : championship.matches.length > 0 ? (
             <div className="space-y-4">
               {championship.matches.map((match) => (
                 <article
