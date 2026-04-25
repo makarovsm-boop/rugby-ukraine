@@ -11,6 +11,7 @@ import {
 import { getApiRugbyStandingsResult } from "@/lib/api-rugby";
 import { championships as championshipOverrides } from "@/lib/championship-data";
 import { FallbackState } from "@/components/fallback-state";
+import { TeamBadge } from "@/components/team-badge";
 import {
   getMatchStatusClasses,
   getMatchStatusLabel,
@@ -205,7 +206,7 @@ export default async function ChampionshipPage({
                           {team.position}
                         </td>
                         <td className="px-4 py-4 font-medium text-slate-950">
-                          {team.name}
+                          <TeamBadge name={team.name} />
                         </td>
                         <td className="px-4 py-4">{formatStandingValue(team.played)}</td>
                         <td className="px-4 py-4">{formatStandingValue(team.won)}</td>
