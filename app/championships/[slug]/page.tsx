@@ -102,6 +102,8 @@ export default async function ChampionshipPage({
     championshipOverride?.standings.length
       ? "Таблиця оновлена редакцією за актуальними зовнішніми даними і використовується як ручний override для цього турніру."
       : apiRugbyStandings.message;
+  const formatStandingValue = (value: number | null | undefined) =>
+    typeof value === "number" ? value : "—";
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
@@ -205,9 +207,9 @@ export default async function ChampionshipPage({
                         <td className="px-4 py-4 font-medium text-slate-950">
                           {team.name}
                         </td>
-                        <td className="px-4 py-4">{team.played}</td>
-                        <td className="px-4 py-4">{team.won}</td>
-                        <td className="px-4 py-4">{team.lost}</td>
+                        <td className="px-4 py-4">{formatStandingValue(team.played)}</td>
+                        <td className="px-4 py-4">{formatStandingValue(team.won)}</td>
+                        <td className="px-4 py-4">{formatStandingValue(team.lost)}</td>
                         <td className="px-4 py-4 font-semibold text-[var(--accent)]">
                           {team.points}
                         </td>

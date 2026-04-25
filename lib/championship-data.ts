@@ -9,9 +9,9 @@ export type Championship = {
   standings: {
     position: number;
     name: string;
-    played: number;
-    won: number;
-    lost: number;
+    played: number | null;
+    won: number | null;
+    lost: number | null;
     points: number;
   }[];
   matches: {
@@ -117,29 +117,89 @@ export const championships: Championship[] = [
       "Турнір, який об'єднує провідні клуби Ірландії, Шотландії, Уельсу, Італії та Південної Африки в одному чемпіонаті.",
     image: "/championship-urc.svg",
     standings: [
-      { position: 1, name: "Leinster", played: 15, won: 13, lost: 2, points: 59 },
-      { position: 2, name: "Bulls", played: 15, won: 11, lost: 4, points: 49 },
-      { position: 3, name: "Glasgow Warriors", played: 15, won: 10, lost: 5, points: 45 },
-      { position: 4, name: "Stormers", played: 15, won: 9, lost: 6, points: 41 },
+      { position: 1, name: "DHL Stormers", played: 16, won: null, lost: null, points: 56 },
+      { position: 2, name: "Glasgow Warriors", played: 16, won: null, lost: null, points: 55 },
+      { position: 3, name: "Fidelity SecureDrive Lions", played: 16, won: null, lost: null, points: 53 },
+      { position: 4, name: "Leinster Rugby", played: 16, won: null, lost: null, points: 53 },
+      { position: 5, name: "Munster Rugby", played: 16, won: null, lost: null, points: 51 },
+      { position: 6, name: "Cardiff Rugby", played: 16, won: null, lost: null, points: 50 },
+      { position: 7, name: "Vodacom Bulls", played: 16, won: null, lost: null, points: 49 },
+      { position: 8, name: "Ulster Rugby", played: 16, won: null, lost: null, points: 47 },
+      { position: 9, name: "Connacht Rugby", played: 16, won: null, lost: null, points: 44 },
+      { position: 10, name: "Hollywoodbets Sharks", played: 16, won: null, lost: null, points: 36 },
+      { position: 11, name: "Ospreys", played: 16, won: null, lost: null, points: 35 },
+      { position: 12, name: "Edinburgh Rugby", played: 16, won: null, lost: null, points: 33 },
+      { position: 13, name: "Benetton Rugby", played: 16, won: null, lost: null, points: 33 },
+      { position: 14, name: "Dragons RFC", played: 16, won: null, lost: null, points: 25 },
+      { position: 15, name: "Scarlets", played: 16, won: null, lost: null, points: 24 },
+      { position: 16, name: "Zebre Parma", played: 16, won: null, lost: null, points: 15 },
     ],
     matches: [
       {
-        round: "16 тур",
-        teams: "Leinster vs Bulls",
-        date: "25 квітня 2026, 20:00",
-        location: "Aviva Stadium",
+        round: "24 квітня 2026 · результат",
+        teams: "Cardiff Rugby 24:21 Ospreys",
+        date: "Cardiff Arms Park",
+        location: "Офіційний результат URC Round 16",
       },
       {
-        round: "16 тур",
-        teams: "Stormers vs Munster",
-        date: "26 квітня 2026, 18:00",
-        location: "Кейптаун",
+        round: "24 квітня 2026 · результат",
+        teams: "Edinburgh Rugby 33:28 Hollywoodbets Sharks",
+        date: "Hive Stadium",
+        location: "Офіційний результат URC Round 16",
       },
       {
-        round: "16 тур",
-        teams: "Glasgow Warriors vs Benetton",
-        date: "27 квітня 2026, 21:00",
-        location: "Глазго",
+        round: "24 квітня 2026 · результат",
+        teams: "Zebre Parma 18:19 Dragons RFC",
+        date: "Stadio Sergio Lanfranchi",
+        location: "Офіційний результат URC Round 16",
+      },
+      {
+        round: "25 квітня 2026 · результат",
+        teams: "DHL Stormers 48:12 Glasgow Warriors",
+        date: "DHL Stadium",
+        location: "Офіційний результат URC Round 16",
+      },
+      {
+        round: "25 квітня 2026 · результат",
+        teams: "Fidelity SecureDrive Lions 33:21 Connacht Rugby",
+        date: "Ellis Park",
+        location: "Офіційний результат URC Round 16",
+      },
+      {
+        round: "25 квітня 2026 · результат",
+        teams: "Munster Rugby 41:14 Ulster Rugby",
+        date: "Thomond Park",
+        location: "Офіційний результат URC Round 16",
+      },
+      {
+        round: "25 квітня 2026 · результат",
+        teams: "Scarlets 21:23 Vodacom Bulls",
+        date: "Parc y Scarlets",
+        location: "Офіційний результат URC Round 16",
+      },
+      {
+        round: "25 квітня 2026 · результат",
+        teams: "Benetton Rugby 29:26 Leinster Rugby",
+        date: "Stadio Monigo",
+        location: "Офіційний результат URC Round 16",
+      },
+      {
+        round: "8 травня 2026 · анонс",
+        teams: "Glasgow Warriors vs Cardiff Rugby",
+        date: "18:45, Scotstoun Stadium",
+        location: "Найближчий матч URC",
+      },
+      {
+        round: "8 травня 2026 · анонс",
+        teams: "Ulster Rugby vs DHL Stormers",
+        date: "18:45, Affidea Stadium",
+        location: "Ключова гра наступного туру",
+      },
+      {
+        round: "9 травня 2026 · анонс",
+        teams: "Leinster Rugby vs Fidelity SecureDrive Lions",
+        date: "16:30, Aviva Stadium",
+        location: "Один із центральних матчів туру",
       },
     ],
   },
