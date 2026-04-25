@@ -1,6 +1,7 @@
 export type Championship = {
   slug: string;
   title: string;
+  aliases?: string[];
   season: string;
   region: string;
   format: string;
@@ -22,6 +23,36 @@ export type Championship = {
     location: string;
   }[];
 };
+
+function normalizeChampionshipKey(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9а-яіїєґ]+/gi, " ")
+    .trim();
+}
+
+export function findChampionshipOverride(input: {
+  slug?: string;
+  title?: string;
+}) {
+  const slugKey = input.slug ? normalizeChampionshipKey(input.slug) : null;
+  const titleKey = input.title ? normalizeChampionshipKey(input.title) : null;
+
+  return championships.find((entry) => {
+    const entryKeys = [
+      entry.slug,
+      entry.title,
+      ...(entry.aliases ?? []),
+    ].map(normalizeChampionshipKey);
+
+    return (
+      (slugKey ? entryKeys.includes(slugKey) : false) ||
+      (titleKey ? entryKeys.includes(titleKey) : false)
+    );
+  });
+}
 
 export const championships: Championship[] = [
   {
@@ -257,21 +288,23 @@ export const championships: Championship[] = [
   {
     slug: "investec-champions-cup",
     title: "Investec Champions Cup",
+    aliases: ["Champions Cup"],
     season: "2025/26",
     region: "Європа",
     format: "Клуби",
     description:
       "Головний європейський клубний кубок, де після пулового етапу турнір переходить у плей-оф і кожен матч уже працює як окрема історія на виліт.",
-    image: "/fallback-championship.svg",
+    image:
+      "https://media-cdn.incrowdsports.com/77535d85-bcdc-49b9-9dc9-879e70d9adba.svg?format=webp&width=1920",
     standings: [
-      { position: 1, name: "Glasgow Warriors", played: 4, won: 4, lost: 0, points: 20 },
-      { position: 2, name: "Bordeaux Bègles", played: 4, won: 4, lost: 0, points: 20 },
-      { position: 3, name: "Leinster Rugby", played: 4, won: 4, lost: 0, points: 18 },
-      { position: 4, name: "Bath Rugby", played: 4, won: 3, lost: 1, points: 16 },
-      { position: 5, name: "Northampton Saints", played: 4, won: 3, lost: 1, points: 16 },
-      { position: 6, name: "Harlequins", played: 4, won: 3, lost: 1, points: 15 },
-      { position: 7, name: "RC Toulon", played: 4, won: 3, lost: 1, points: 14 },
-      { position: 8, name: "Bristol Bears", played: 4, won: 3, lost: 1, points: 14 },
+      { position: 1, name: "Glasgow Warriors", logo: "https://media-cdn.incrowdsports.com/f0e4ca1a-3001-42d4-a134-befe8348540c.png?format=webp&width=125", played: 4, won: 4, lost: 0, points: 20 },
+      { position: 2, name: "Union Bordeaux Bègles", logo: "https://media-cdn.cortextech.io/3a3f88b1-d089-4b5a-aece-26469a437790.png?format=webp&width=125", played: 4, won: 4, lost: 0, points: 20 },
+      { position: 3, name: "Leinster Rugby", logo: "https://media-cdn.incrowdsports.com/02ec4396-a5c2-49b2-bd5d-4056277b1278.png?format=webp&width=125", played: 4, won: 4, lost: 0, points: 18 },
+      { position: 4, name: "Bath Rugby", logo: "https://media-cdn.incrowdsports.com/f4d9a293-9086-41bf-aa1b-c98d1c62fe3b.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 16 },
+      { position: 5, name: "Northampton Saints", logo: "https://media-cdn.incrowdsports.com/45fedf62-349b-46af-a6c9-2504dd82ee8c.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 16 },
+      { position: 6, name: "Harlequins", logo: "https://media-cdn.incrowdsports.com/ff7fb9b3-4a02-4407-b075-1d125962ce21.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 15 },
+      { position: 7, name: "RC Toulon", logo: "https://media-cdn.incrowdsports.com/c460bc92-ecd2-48d5-9f8e-ae8e12a2ebf4.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 14 },
+      { position: 8, name: "Bristol Bears", logo: "https://media-cdn.incrowdsports.com/714ab764-0396-4c96-80df-4013a723d172.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 14 },
     ],
     matches: [
       {
@@ -315,21 +348,23 @@ export const championships: Championship[] = [
   {
     slug: "champions-cup",
     title: "Investec Champions Cup",
+    aliases: ["Investec Champions Cup", "Champions Cup"],
     season: "2025/26",
     region: "Європа",
     format: "Клуби",
     description:
       "Головний європейський клубний кубок, де після пулового етапу турнір переходить у плей-оф і кожен матч уже працює як окрема історія на виліт.",
-    image: "/fallback-championship.svg",
+    image:
+      "https://media-cdn.incrowdsports.com/77535d85-bcdc-49b9-9dc9-879e70d9adba.svg?format=webp&width=1920",
     standings: [
-      { position: 1, name: "Glasgow Warriors", played: 4, won: 4, lost: 0, points: 20 },
-      { position: 2, name: "Bordeaux Bègles", played: 4, won: 4, lost: 0, points: 20 },
-      { position: 3, name: "Leinster Rugby", played: 4, won: 4, lost: 0, points: 18 },
-      { position: 4, name: "Bath Rugby", played: 4, won: 3, lost: 1, points: 16 },
-      { position: 5, name: "Northampton Saints", played: 4, won: 3, lost: 1, points: 16 },
-      { position: 6, name: "Harlequins", played: 4, won: 3, lost: 1, points: 15 },
-      { position: 7, name: "RC Toulon", played: 4, won: 3, lost: 1, points: 14 },
-      { position: 8, name: "Bristol Bears", played: 4, won: 3, lost: 1, points: 14 },
+      { position: 1, name: "Glasgow Warriors", logo: "https://media-cdn.incrowdsports.com/f0e4ca1a-3001-42d4-a134-befe8348540c.png?format=webp&width=125", played: 4, won: 4, lost: 0, points: 20 },
+      { position: 2, name: "Union Bordeaux Bègles", logo: "https://media-cdn.cortextech.io/3a3f88b1-d089-4b5a-aece-26469a437790.png?format=webp&width=125", played: 4, won: 4, lost: 0, points: 20 },
+      { position: 3, name: "Leinster Rugby", logo: "https://media-cdn.incrowdsports.com/02ec4396-a5c2-49b2-bd5d-4056277b1278.png?format=webp&width=125", played: 4, won: 4, lost: 0, points: 18 },
+      { position: 4, name: "Bath Rugby", logo: "https://media-cdn.incrowdsports.com/f4d9a293-9086-41bf-aa1b-c98d1c62fe3b.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 16 },
+      { position: 5, name: "Northampton Saints", logo: "https://media-cdn.incrowdsports.com/45fedf62-349b-46af-a6c9-2504dd82ee8c.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 16 },
+      { position: 6, name: "Harlequins", logo: "https://media-cdn.incrowdsports.com/ff7fb9b3-4a02-4407-b075-1d125962ce21.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 15 },
+      { position: 7, name: "RC Toulon", logo: "https://media-cdn.incrowdsports.com/c460bc92-ecd2-48d5-9f8e-ae8e12a2ebf4.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 14 },
+      { position: 8, name: "Bristol Bears", logo: "https://media-cdn.incrowdsports.com/714ab764-0396-4c96-80df-4013a723d172.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 14 },
     ],
     matches: [
       {

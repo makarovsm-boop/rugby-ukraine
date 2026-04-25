@@ -7,7 +7,7 @@ import {
   getChampionshipRegions,
   getChampionshipsByRegion,
 } from "@/lib/db";
-import { championships as championshipOverrides } from "@/lib/championship-data";
+import { findChampionshipOverride } from "@/lib/championship-data";
 import { getSafeImagePath } from "@/lib/media";
 import { buildTitle } from "@/lib/seo";
 
@@ -29,8 +29,8 @@ function buildChampionshipsHref(region?: string) {
   return region ? `/championships?region=${encodeURIComponent(region)}` : "/championships";
 }
 
-function getOverrideNextMatch(slug: string) {
-  const championshipOverride = championshipOverrides.find((entry) => entry.slug === slug);
+function getOverrideNextMatch(slug: string, title: string) {
+  const championshipOverride = findChampionshipOverride({ slug, title });
   return championshipOverride?.matches.find((match) => match.teams.includes(" vs "));
 }
 
@@ -88,12 +88,34 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
       {championships.length > 0 ? (
         <section className="grid gap-6 lg:grid-cols-3">
           {await Promise.all(championships.map(async (championship, index) => {
+            const championshipOverride = findChampionshipOverride({
+              slug: championship.slug,
+              title: championship.title,
+            });
+            const displayChampionship = championshipOverride
+              ? {
+                  ...championship,
+                  title: championshipOverride.title,
+                  season: championshipOverride.season,
+                  region: championshipOverride.region,
+                  format: championshipOverride.format,
+                  description: championshipOverride.description,
+                  image: championshipOverride.image,
+                }
+              : championship;
             const safeImage = await getSafeImagePath(
-              championship.image,
+              displayChampionship.image,
               "championships",
             );
             const nextMatch = championship.matches[0];
-            const overrideNextMatch = getOverrideNextMatch(championship.slug);
+            const overrideNextMatch = getOverrideNextMatch(
+              championship.slug,
+              championship.title,
+            );
+            const matchesCount =
+              championshipOverride?.matches.length && championshipOverride.matches.length > 0
+                ? championshipOverride.matches.length
+                : championship.matches.length;
 
             return (
             <article
@@ -103,7 +125,7 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
               <div className="relative aspect-[16/10] bg-white">
                 <Image
                   src={safeImage}
-                  alt={championship.title}
+                  alt={displayChampionship.title}
                   fill
                   className="object-contain p-5"
                   priority={index === 0}
@@ -113,29 +135,29 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
 
               <div className="space-y-4 p-5 sm:p-6">
                 <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
-                  <span>{championship.season}</span>
+                  <span>{displayChampionship.season}</span>
                   <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
-                    {championship.format}
+                    {displayChampionship.format}
                   </span>
                 </div>
 
                 <h2 className="text-2xl font-semibold leading-tight text-slate-950">
-                  {championship.title}
+                  {displayChampionship.title}
                 </h2>
 
                 <p className="text-sm leading-7 text-slate-600">
-                  {championship.description}
+                  {displayChampionship.description}
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 rounded-[1.25rem] bg-slate-50 p-4 text-sm text-slate-600">
                   <div>
-                    <p className="font-semibold text-slate-900">{championship.region}</p>
+                    <p className="font-semibold text-slate-900">{displayChampionship.region}</p>
                     <p className="mt-1 text-xs uppercase tracking-[0.12em] text-slate-500">
                       Регіон
                     </p>
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">{championship.matches.length}</p>
+                    <p className="font-semibold text-slate-900">{matchesCount}</p>
                     <p className="mt-1 text-xs uppercase tracking-[0.12em] text-slate-500">
                       Матчів
                     </p>

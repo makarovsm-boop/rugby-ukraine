@@ -9,7 +9,7 @@ import {
   getChampionships,
 } from "@/lib/db";
 import { getApiRugbyStandingsResult } from "@/lib/api-rugby";
-import { championships as championshipOverrides } from "@/lib/championship-data";
+import { findChampionshipOverride } from "@/lib/championship-data";
 import { FallbackState } from "@/components/fallback-state";
 import { TeamBadge } from "@/components/team-badge";
 import {
@@ -45,20 +45,36 @@ export async function generateMetadata({
     };
   }
 
+  const championshipOverride = findChampionshipOverride({
+    slug: championship.slug,
+    title: championship.title,
+  });
+  const displayChampionship = championshipOverride
+    ? {
+        ...championship,
+        title: championshipOverride.title,
+        season: championshipOverride.season,
+        region: championshipOverride.region,
+        format: championshipOverride.format,
+        description: championshipOverride.description,
+        image: championshipOverride.image,
+      }
+    : championship;
+
   const safeImage = await getSafeImagePath(
-    championship.image,
+    displayChampionship.image,
     "championships",
   );
 
   return {
-    title: buildTitle(championship.title),
-    description: championship.description,
+    title: buildTitle(displayChampionship.title),
+    description: displayChampionship.description,
     alternates: {
       canonical: `/championships/${championship.slug}`,
     },
     openGraph: {
-      title: buildTitle(championship.title),
-      description: championship.description,
+      title: buildTitle(displayChampionship.title),
+      description: displayChampionship.description,
       url: `${siteConfig.url}/championships/${championship.slug}`,
       type: "website",
       images: [
@@ -80,25 +96,42 @@ export default async function ChampionshipPage({
     notFound();
   }
 
+  const championshipOverride = findChampionshipOverride({
+    slug: championship.slug,
+    title: championship.title,
+  });
+  const displayChampionship = championshipOverride
+    ? {
+        ...championship,
+        title: championshipOverride.title,
+        season: championshipOverride.season,
+        region: championshipOverride.region,
+        format: championshipOverride.format,
+        description: championshipOverride.description,
+        image: championshipOverride.image,
+      }
+    : championship;
+
   const safeImage = await getSafeImagePath(
-    championship.image,
+    displayChampionship.image,
     "championships",
-  );
-  const championshipOverride = championshipOverrides.find(
-    (entry) => entry.slug === championship.slug,
   );
 
   const fallbackStandings = buildStandings(championship.matches);
   const apiRugbyStandings = await getApiRugbyStandingsResult({
-    slug: championship.slug,
-    title: championship.title,
-    season: championship.season,
+    slug: displayChampionship.slug,
+    title: displayChampionship.title,
+    season: displayChampionship.season,
   });
   const standings =
     championshipOverride?.standings.length
       ? championshipOverride.standings
       : apiRugbyStandings.rows ?? fallbackStandings;
   const championshipMatchesOverride = championshipOverride?.matches ?? [];
+  const matchesCount =
+    championshipMatchesOverride.length > 0
+      ? championshipMatchesOverride.length
+      : championship.matches.length;
   const standingsMessage =
     championshipOverride?.standings.length
       ? "Таблиця оновлена редакцією за актуальними зовнішніми даними і використовується як ручний override для цього турніру."
@@ -119,7 +152,7 @@ export default async function ChampionshipPage({
         <div className="relative aspect-[16/7] bg-white">
           <Image
             src={safeImage}
-            alt={championship.title}
+            alt={displayChampionship.title}
             fill
             className="object-contain p-6 sm:p-8"
             priority
@@ -129,19 +162,19 @@ export default async function ChampionshipPage({
 
         <div className="space-y-6 p-6 sm:p-8 lg:p-10">
           <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
-            <span>{championship.season}</span>
+            <span>{displayChampionship.season}</span>
             <span className="rounded-full bg-emerald-50 px-3 py-1 font-medium text-emerald-700">
-              {championship.format}
+              {displayChampionship.format}
             </span>
-            <span>{championship.region}</span>
+            <span>{displayChampionship.region}</span>
           </div>
 
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-              {championship.title}
+              {displayChampionship.title}
             </h1>
             <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600">
-              {championship.description}
+              {displayChampionship.description}
             </p>
           </div>
 
@@ -149,19 +182,19 @@ export default async function ChampionshipPage({
             <div>
               <p className="font-semibold text-slate-900">Сезон</p>
               <p className="mt-2 text-lg font-semibold text-slate-950">
-                {championship.season}
+                {displayChampionship.season}
               </p>
             </div>
             <div>
               <p className="font-semibold text-slate-900">Регіон</p>
               <p className="mt-2 text-lg font-semibold text-slate-950">
-                {championship.region}
+                {displayChampionship.region}
               </p>
             </div>
             <div>
               <p className="font-semibold text-slate-900">Матчів у базі</p>
               <p className="mt-2 text-lg font-semibold text-slate-950">
-                {championship.matches.length}
+                {matchesCount}
               </p>
             </div>
           </div>
