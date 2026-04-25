@@ -144,6 +144,50 @@ export const championships: Championship[] = [
     ],
   },
   {
+    slug: "six-nations",
+    title: "Six Nations",
+    season: "2026",
+    region: "Європа",
+    format: "Збірні",
+    description:
+      "Найпрестижніший щорічний турнір збірних Північної півкулі. Сезон 2026 уже завершено, тож на сторінці показуємо фінальну таблицю та підсумкові результати.",
+    image: "/fallback-championship.svg",
+    standings: [
+      { position: 1, name: "Франція", played: 5, won: 4, lost: 1, points: 21 },
+      { position: 2, name: "Ірландія", played: 5, won: 4, lost: 1, points: 19 },
+      { position: 3, name: "Шотландія", played: 5, won: 3, lost: 2, points: 16 },
+      { position: 4, name: "Італія", played: 5, won: 2, lost: 3, points: 9 },
+      { position: 5, name: "Англія", played: 5, won: 1, lost: 4, points: 8 },
+      { position: 6, name: "Уельс", played: 5, won: 1, lost: 4, points: 6 },
+    ],
+    matches: [
+      {
+        round: "14 березня 2026 · фінальний тур",
+        teams: "Ірландія 14:10 Шотландія",
+        date: "Aviva Stadium, Дублін",
+        location: "Ірландія завершила турнір перемогою та взяла Triple Crown",
+      },
+      {
+        round: "14 березня 2026 · фінальний тур",
+        teams: "Уельс 16:40 Італія",
+        date: "Principality Stadium, Кардіфф",
+        location: "Італія фінішувала четвертою, Уельс залишився шостим",
+      },
+      {
+        round: "14 березня 2026 · фінальний тур",
+        teams: "Франція 20:10 Англія",
+        date: "Stade de France, Сен-Дені",
+        location: "Франція виграла турнір після перемоги в останньому матчі",
+      },
+      {
+        round: "Статус сезону",
+        teams: "Турнір завершено",
+        date: "Наступний розіграш стартує вже в сезоні 2027",
+        location: "Ця сторінка показує підсумок кампанії 2026",
+      },
+    ],
+  },
+  {
     slug: "investec-champions-cup",
     title: "Investec Champions Cup",
     season: "2025/26",
