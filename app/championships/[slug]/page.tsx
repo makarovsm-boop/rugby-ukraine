@@ -9,7 +9,7 @@ import {
   getChampionships,
 } from "@/lib/db";
 import { getApiRugbyStandingsResult } from "@/lib/api-rugby";
-import { findChampionshipOverride } from "@/lib/championship-data";
+import { championships as championshipOverrides, findChampionshipOverride } from "@/lib/championship-data";
 import { FallbackState } from "@/components/fallback-state";
 import { TeamBadge } from "@/components/team-badge";
 import {
@@ -27,10 +27,13 @@ type ChampionshipPageProps = {
 
 export async function generateStaticParams() {
   const championships = await getChampionships();
+  const slugs = new Set(championships.map((championship) => championship.slug));
 
-  return championships.map((championship) => ({
-    slug: championship.slug,
-  }));
+  for (const championship of championshipOverrides) {
+    slugs.add(championship.slug);
+  }
+
+  return [...slugs].map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -38,28 +41,37 @@ export async function generateMetadata({
 }: ChampionshipPageProps): Promise<Metadata> {
   const { slug } = await params;
   const championship = await getChampionshipBySlug(slug);
+  const championshipOverride = findChampionshipOverride({ slug });
 
-  if (!championship) {
+  if (!championship && !championshipOverride) {
     return {
       title: buildTitle("Чемпіонати"),
     };
   }
 
-  const championshipOverride = findChampionshipOverride({
-    slug: championship.slug,
-    title: championship.title,
-  });
-  const displayChampionship = championshipOverride
-    ? {
-        ...championship,
-        title: championshipOverride.title,
-        season: championshipOverride.season,
-        region: championshipOverride.region,
-        format: championshipOverride.format,
-        description: championshipOverride.description,
-        image: championshipOverride.image,
-      }
-    : championship;
+  const displayChampionship = championship
+    ? championshipOverride
+      ? {
+          ...championship,
+          title: championshipOverride.title,
+          season: championshipOverride.season,
+          region: championshipOverride.region,
+          format: championshipOverride.format,
+          description: championshipOverride.description,
+          image: championshipOverride.image,
+        }
+      : championship
+    : {
+        id: championshipOverride!.slug,
+        slug: championshipOverride!.slug,
+        title: championshipOverride!.title,
+        season: championshipOverride!.season,
+        region: championshipOverride!.region,
+        format: championshipOverride!.format,
+        description: championshipOverride!.description,
+        image: championshipOverride!.image,
+        matches: [],
+      };
 
   const safeImage = await getSafeImagePath(
     displayChampionship.image,
@@ -70,12 +82,12 @@ export async function generateMetadata({
     title: buildTitle(displayChampionship.title),
     description: displayChampionship.description,
     alternates: {
-      canonical: `/championships/${championship.slug}`,
+      canonical: `/championships/${slug}`,
     },
     openGraph: {
       title: buildTitle(displayChampionship.title),
       description: displayChampionship.description,
-      url: `${siteConfig.url}/championships/${championship.slug}`,
+      url: `${siteConfig.url}/championships/${slug}`,
       type: "website",
       images: [
         {
@@ -91,33 +103,45 @@ export default async function ChampionshipPage({
 }: ChampionshipPageProps) {
   const { slug } = await params;
   const championship = await getChampionshipBySlug(slug);
+  const championshipOverride = findChampionshipOverride({
+    slug,
+    title: championship?.title,
+  });
 
-  if (!championship) {
+  if (!championship && !championshipOverride) {
     notFound();
   }
 
-  const championshipOverride = findChampionshipOverride({
-    slug: championship.slug,
-    title: championship.title,
-  });
-  const displayChampionship = championshipOverride
-    ? {
-        ...championship,
-        title: championshipOverride.title,
-        season: championshipOverride.season,
-        region: championshipOverride.region,
-        format: championshipOverride.format,
-        description: championshipOverride.description,
-        image: championshipOverride.image,
-      }
-    : championship;
+  const displayChampionship = championship
+    ? championshipOverride
+      ? {
+          ...championship,
+          title: championshipOverride.title,
+          season: championshipOverride.season,
+          region: championshipOverride.region,
+          format: championshipOverride.format,
+          description: championshipOverride.description,
+          image: championshipOverride.image,
+        }
+      : championship
+    : {
+        id: championshipOverride!.slug,
+        slug: championshipOverride!.slug,
+        title: championshipOverride!.title,
+        season: championshipOverride!.season,
+        region: championshipOverride!.region,
+        format: championshipOverride!.format,
+        description: championshipOverride!.description,
+        image: championshipOverride!.image,
+        matches: [],
+      };
 
   const safeImage = await getSafeImagePath(
     displayChampionship.image,
     "championships",
   );
 
-  const fallbackStandings = buildStandings(championship.matches);
+  const fallbackStandings = championship ? buildStandings(championship.matches) : [];
   const apiRugbyStandings = await getApiRugbyStandingsResult({
     slug: displayChampionship.slug,
     title: displayChampionship.title,
@@ -131,7 +155,7 @@ export default async function ChampionshipPage({
   const matchesCount =
     championshipMatchesOverride.length > 0
       ? championshipMatchesOverride.length
-      : championship.matches.length;
+      : championship?.matches.length ?? 0;
   const standingsMessage =
     championshipOverride?.standings.length
       ? "Таблиця оновлена редакцією за актуальними зовнішніми даними і використовується як ручний override для цього турніру."
@@ -294,7 +318,7 @@ export default async function ChampionshipPage({
                 </article>
               ))}
             </div>
-          ) : championship.matches.length > 0 ? (
+          ) : championship && championship.matches.length > 0 ? (
             <div className="space-y-4">
               {championship.matches.map((match) => (
                 <article

@@ -7,7 +7,7 @@ import {
   getChampionshipRegions,
   getChampionshipsByRegion,
 } from "@/lib/db";
-import { findChampionshipOverride } from "@/lib/championship-data";
+import { championships as championshipOverrides, findChampionshipOverride } from "@/lib/championship-data";
 import { getSafeImagePath } from "@/lib/media";
 import { buildTitle } from "@/lib/seo";
 
@@ -36,10 +36,35 @@ function getOverrideNextMatch(slug: string, title: string) {
 
 export default async function ChampionshipsPage({ searchParams }: ChampionshipsPageProps) {
   const { region } = await searchParams;
-  const [championships, regions] = await Promise.all([
+  const [dbChampionships, dbRegions] = await Promise.all([
     getChampionshipsByRegion(region),
     getChampionshipRegions(),
   ]);
+  const championships = [
+    ...dbChampionships,
+    ...championshipOverrides
+      .filter((override) =>
+        !dbChampionships.some(
+          (championship) =>
+            championship.slug === override.slug ||
+            championship.title === override.title,
+        ),
+      )
+      .filter((override) => (region ? override.region === region : true))
+      .map((override) => ({
+        id: override.slug,
+        slug: override.slug,
+        title: override.title,
+        season: override.season,
+        region: override.region,
+        format: override.format,
+        description: override.description,
+        image: override.image,
+        matches: [],
+      })),
+  ].sort((a, b) => a.title.localeCompare(b.title, "uk"));
+  const regions = [...new Set([...dbRegions, ...championshipOverrides.map((item) => item.region)])]
+    .sort((a, b) => a.localeCompare(b, "uk"));
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
