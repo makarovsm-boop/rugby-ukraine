@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "media-cdn.incrowdsports.com",
+      },
+      {
+        protocol: "https",
+        hostname: "media-cdn.cortextech.io",
+      },
+      {
+        protocol: "https",
         hostname: "www.unitedrugby.com",
       },
     ],
