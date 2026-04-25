@@ -7,6 +7,7 @@ import {
   getChampionshipRegions,
   getChampionshipsByRegion,
 } from "@/lib/db";
+import { championships as championshipOverrides } from "@/lib/championship-data";
 import { getSafeImagePath } from "@/lib/media";
 import { buildTitle } from "@/lib/seo";
 
@@ -26,6 +27,11 @@ type ChampionshipsPageProps = {
 
 function buildChampionshipsHref(region?: string) {
   return region ? `/championships?region=${encodeURIComponent(region)}` : "/championships";
+}
+
+function getOverrideNextMatch(slug: string) {
+  const championshipOverride = championshipOverrides.find((entry) => entry.slug === slug);
+  return championshipOverride?.matches.find((match) => match.teams.includes(" vs "));
 }
 
 export default async function ChampionshipsPage({ searchParams }: ChampionshipsPageProps) {
@@ -87,6 +93,7 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
               "championships",
             );
             const nextMatch = championship.matches[0];
+            const overrideNextMatch = getOverrideNextMatch(championship.slug);
 
             return (
             <article
@@ -138,12 +145,16 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
                 <div className="rounded-[1.25rem] bg-slate-50 p-4 text-sm text-slate-600">
                   <p className="font-semibold text-slate-900">Наступний матч</p>
                   <p className="mt-2">
-                    {nextMatch
+                    {overrideNextMatch
+                      ? overrideNextMatch.teams
+                      : nextMatch
                       ? `${nextMatch.homeTeam.name} vs ${nextMatch.awayTeam.name}`
                       : "Матчів поки немає"}
                   </p>
                   <p className="mt-1 text-slate-500">
-                    {nextMatch
+                    {overrideNextMatch
+                      ? `${overrideNextMatch.round} · ${overrideNextMatch.date}`
+                      : nextMatch
                       ? formatDateTime(nextMatch.date)
                       : ""}
                   </p>
