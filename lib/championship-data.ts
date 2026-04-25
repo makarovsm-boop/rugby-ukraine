@@ -9,6 +9,7 @@ export type Championship = {
   standings: {
     position: number;
     name: string;
+    logo?: string;
     played: number | null;
     won: number | null;
     lost: number | null;
@@ -117,22 +118,22 @@ export const championships: Championship[] = [
       "Турнір, який об'єднує провідні клуби Ірландії, Шотландії, Уельсу, Італії та Південної Африки в одному чемпіонаті.",
     image: "/championship-urc.svg",
     standings: [
-      { position: 1, name: "DHL Stormers", played: 16, won: null, lost: null, points: 56 },
-      { position: 2, name: "Glasgow Warriors", played: 16, won: null, lost: null, points: 55 },
-      { position: 3, name: "Fidelity SecureDrive Lions", played: 16, won: null, lost: null, points: 53 },
-      { position: 4, name: "Leinster Rugby", played: 16, won: null, lost: null, points: 53 },
-      { position: 5, name: "Munster Rugby", played: 16, won: null, lost: null, points: 51 },
-      { position: 6, name: "Cardiff Rugby", played: 16, won: null, lost: null, points: 50 },
-      { position: 7, name: "Vodacom Bulls", played: 16, won: null, lost: null, points: 49 },
-      { position: 8, name: "Ulster Rugby", played: 16, won: null, lost: null, points: 47 },
-      { position: 9, name: "Connacht Rugby", played: 16, won: null, lost: null, points: 44 },
-      { position: 10, name: "Hollywoodbets Sharks", played: 16, won: null, lost: null, points: 36 },
-      { position: 11, name: "Ospreys", played: 16, won: null, lost: null, points: 35 },
-      { position: 12, name: "Edinburgh Rugby", played: 16, won: null, lost: null, points: 33 },
-      { position: 13, name: "Benetton Rugby", played: 16, won: null, lost: null, points: 33 },
-      { position: 14, name: "Dragons RFC", played: 16, won: null, lost: null, points: 25 },
-      { position: 15, name: "Scarlets", played: 16, won: null, lost: null, points: 24 },
-      { position: 16, name: "Zebre Parma", played: 16, won: null, lost: null, points: 15 },
+      { position: 1, name: "DHL Stormers", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/08/Stormers.svg", played: 16, won: 12, lost: 4, points: 56 },
+      { position: 2, name: "Glasgow Warriors", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Glasgow-Warriors-1.svg", played: 16, won: 11, lost: 5, points: 55 },
+      { position: 3, name: "Fidelity SecureDrive Lions", logo: "https://www.unitedrugby.com/wp-content/uploads/2026/03/Fidelity-SecureDrive-Lions.svg", played: 16, won: 10, lost: 5, points: 53 },
+      { position: 4, name: "Leinster Rugby", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Leinster.svg", played: 16, won: 10, lost: 6, points: 53 },
+      { position: 5, name: "Munster Rugby", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Munster-Rugby.svg", played: 16, won: 10, lost: 6, points: 51 },
+      { position: 6, name: "Cardiff Rugby", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Cardiff-Rugby-1.svg", played: 16, won: 10, lost: 6, points: 50 },
+      { position: 7, name: "Vodacom Bulls", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Vodacom.svg", played: 16, won: 10, lost: 6, points: 49 },
+      { position: 8, name: "Ulster Rugby", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Ulster-1.svg", played: 16, won: 9, lost: 7, points: 47 },
+      { position: 9, name: "Connacht Rugby", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Connacht.svg", played: 16, won: 8, lost: 8, points: 44 },
+      { position: 10, name: "Hollywoodbets Sharks", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Hollywoodbets-Sharks.svg", played: 16, won: 6, lost: 9, points: 36 },
+      { position: 11, name: "Ospreys", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Ospreys-1.svg", played: 16, won: 6, lost: 8, points: 35 },
+      { position: 12, name: "Edinburgh Rugby", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Edinburgh-1.svg", played: 16, won: 6, lost: 10, points: 33 },
+      { position: 13, name: "Benetton Rugby", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Benetton-Rugby-1.svg", played: 16, won: 6, lost: 8, points: 33 },
+      { position: 14, name: "Dragons RFC", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Dragons-1.svg", played: 16, won: 3, lost: 10, points: 25 },
+      { position: 15, name: "Scarlets", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Scarlets-1.svg", played: 16, won: 4, lost: 11, points: 24 },
+      { position: 16, name: "Zebre Parma", logo: "https://www.unitedrugby.com/wp-content/uploads/2025/05/Zebre-Parma-1.svg", played: 16, won: 2, lost: 14, points: 15 },
     ],
     matches: [
       {

@@ -206,7 +206,7 @@ export default async function ChampionshipPage({
                           {team.position}
                         </td>
                         <td className="px-4 py-4 font-medium text-slate-950">
-                          <TeamBadge name={team.name} />
+                          <TeamBadge name={team.name} logo={"logo" in team ? team.logo : undefined} />
                         </td>
                         <td className="px-4 py-4">{formatStandingValue(team.played)}</td>
                         <td className="px-4 py-4">{formatStandingValue(team.won)}</td>
