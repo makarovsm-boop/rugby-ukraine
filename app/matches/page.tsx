@@ -59,7 +59,7 @@ type EditorialMatchCard = {
   venueText: string;
   kickoffText: string;
   parsedDate: Date | null;
-  status: "upcoming" | "finished";
+  status: "upcoming" | "live" | "finished";
 };
 
 function parseEditorialMatchDate(round: string, date: string) {
@@ -89,8 +89,9 @@ function getEditorialMatchCards() {
       .map((match) => {
         const parsedDate = parseEditorialMatchDate(match.round, match.date);
         const lowerRound = match.round.toLowerCase();
-        const status =
-          lowerRound.includes("анонс") || lowerRound.includes("півфінал")
+        const status = lowerRound.includes("наживо")
+          ? "live"
+          : lowerRound.includes("анонс") || lowerRound.includes("півфінал")
             ? "upcoming"
             : "finished";
 
@@ -149,7 +150,7 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
   const editorialSchedule = editorialMatches
     .filter(
       (match) =>
-        match.status === "upcoming" &&
+        (match.status === "upcoming" || match.status === "live") &&
         match.parsedDate &&
         match.parsedDate >= today &&
         match.parsedDate <= twoWeeksAhead,
@@ -232,8 +233,14 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
                         {match.teams}
                       </h3>
                     </div>
-                    <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700">
-                      Скоро
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                        match.status === "live"
+                          ? "bg-rose-50 text-rose-700"
+                          : "bg-emerald-50 text-emerald-700"
+                      }`}
+                    >
+                      {match.status === "live" ? "Наживо" : "Скоро"}
                     </span>
                   </div>
 
