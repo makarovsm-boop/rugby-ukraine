@@ -30,6 +30,48 @@ type ChampionshipPageProps = {
   }>;
 };
 
+function buildChampionshipLogoMap(
+  rows: { name: string; logo?: string }[] | undefined,
+) {
+  const map = new Map<string, string>();
+
+  for (const row of rows ?? []) {
+    if (row.logo) {
+      map.set(row.name, row.logo);
+    }
+  }
+
+  return map;
+}
+
+function parseOverrideMatchTeams(teams: string) {
+  if (teams.includes(" vs ")) {
+    const [home, away] = teams.split(" vs ");
+
+    return {
+      homeTeam: home.trim(),
+      awayTeam: away.trim(),
+      score: null as string | null,
+    };
+  }
+
+  const scoreMatch = teams.match(/^(.*)\s+(\d+:\d+)\s+(.*)$/);
+
+  if (scoreMatch) {
+    return {
+      homeTeam: scoreMatch[1].trim(),
+      awayTeam: scoreMatch[3].trim(),
+      score: scoreMatch[2].trim(),
+    };
+  }
+
+  return {
+    homeTeam: teams,
+    awayTeam: "",
+    score: null as string | null,
+  };
+}
+
 export async function generateStaticParams() {
   const championships = await getChampionships();
   const slugs = new Set(championships.map((championship) => championship.slug));
@@ -183,6 +225,9 @@ export default async function ChampionshipPage({
     championshipOverride?.standings.length
       ? championshipOverride.standings
       : apiRugbyStandings.rows ?? fallbackStandings;
+  const championshipLogoMap = buildChampionshipLogoMap(
+    championshipOverride?.standings,
+  );
   const championshipMatchesOverride = championshipOverride?.matches ?? [];
   const isChampionsCupPlayoffs =
     displayChampionship.slug === "investec-champions-cup" ||
@@ -299,9 +344,35 @@ export default async function ChampionshipPage({
                       </span>
                     </div>
                     <div className="mt-3 space-y-3">
-                      <h3 className="text-xl font-semibold leading-tight text-slate-950">
-                        {match.teams}
-                      </h3>
+                      {(() => {
+                        const parsedMatch = parseOverrideMatchTeams(match.teams);
+
+                        return parsedMatch.awayTeam ? (
+                          <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+                            <div className="min-w-0">
+                              <TeamBadge
+                                name={parsedMatch.homeTeam}
+                                logo={championshipLogoMap.get(parsedMatch.homeTeam)}
+                              />
+                            </div>
+                            <div className="text-center">
+                              <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
+                                {parsedMatch.score ?? "vs"}
+                              </span>
+                            </div>
+                            <div className="min-w-0 sm:justify-self-end">
+                              <TeamBadge
+                                name={parsedMatch.awayTeam}
+                                logo={championshipLogoMap.get(parsedMatch.awayTeam)}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <h3 className="text-xl font-semibold leading-tight text-slate-950">
+                            {match.teams}
+                          </h3>
+                        );
+                      })()}
                       <p className="text-sm text-slate-600">{match.date}</p>
                       <p className="text-sm text-slate-500">{match.location}</p>
                     </div>
