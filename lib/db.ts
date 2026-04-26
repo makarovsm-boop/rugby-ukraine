@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { getMatchStatusSortOrder } from "@/lib/match-status";
+import {
+  getEditorialArticleBySlug,
+  mergeEditorialArticles,
+} from "@/lib/editorial-news";
 
 export function formatDate(date: Date) {
   return new Intl.DateTimeFormat("uk-UA", {
@@ -72,14 +76,22 @@ export async function getHomePageData() {
       a.date.getTime() - b.date.getTime(),
   );
 
-  return { articles, championships, teams, matches: prioritizedMatches, results };
+  return {
+    articles: mergeEditorialArticles(articles).slice(0, 3),
+    championships,
+    teams,
+    matches: prioritizedMatches,
+    results,
+  };
 }
 
 export async function getNewsList() {
-  return prisma.article.findMany({
+  const articles = await prisma.article.findMany({
     where: { published: true },
     orderBy: { date: "desc" },
   });
+
+  return mergeEditorialArticles(articles);
 }
 
 export const NEWS_PAGE_SIZE = 9;
@@ -89,32 +101,21 @@ export async function getPaginatedNewsList(page: number, limit = NEWS_PAGE_SIZE)
   const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : NEWS_PAGE_SIZE;
   const skip = (safePage - 1) * safeLimit;
 
-  const [items, total] = await Promise.all([
-    prisma.article.findMany({
-      where: { published: true },
-      orderBy: { date: "desc" },
-      skip,
-      take: safeLimit,
-    }),
-    prisma.article.count({
-      where: { published: true },
-    }),
-  ]);
+  const dbItems = await prisma.article.findMany({
+    where: { published: true },
+    orderBy: { date: "desc" },
+  });
+  const mergedItems = mergeEditorialArticles(dbItems);
+  const total = mergedItems.length;
 
   const totalPages = Math.max(1, Math.ceil(total / safeLimit));
   const currentPage = Math.min(safePage, totalPages);
+  const currentSkip = (currentPage - 1) * safeLimit;
+  const items = mergedItems.slice(currentSkip, currentSkip + safeLimit);
 
   if (currentPage !== safePage) {
-    const adjustedSkip = (currentPage - 1) * safeLimit;
-    const adjustedItems = await prisma.article.findMany({
-      where: { published: true },
-      orderBy: { date: "desc" },
-      skip: adjustedSkip,
-      take: safeLimit,
-    });
-
     return {
-      items: adjustedItems,
+      items,
       total,
       page: currentPage,
       limit: safeLimit,
@@ -335,7 +336,7 @@ export async function getAllPublicMatches() {
 }
 
 export async function getNewsArticle(slug: string) {
-  return prisma.article.findFirst({
+  const article = await prisma.article.findFirst({
     where: {
       slug,
       published: true,
@@ -349,6 +350,8 @@ export async function getNewsArticle(slug: string) {
       },
     },
   });
+
+  return article ?? getEditorialArticleBySlug(slug);
 }
 
 export async function getAdminArticleBySlug(slug: string) {
@@ -366,14 +369,17 @@ export async function getAdminArticleBySlug(slug: string) {
 }
 
 export async function getRelatedNews(slug: string) {
-  return prisma.article.findMany({
+  const dbArticles = await prisma.article.findMany({
     where: {
       published: true,
       NOT: { slug },
     },
     orderBy: { date: "desc" },
-    take: 2,
   });
+
+  return mergeEditorialArticles(dbArticles)
+    .filter((article) => article.slug !== slug)
+    .slice(0, 2);
 }
 
 export async function getChampionships() {

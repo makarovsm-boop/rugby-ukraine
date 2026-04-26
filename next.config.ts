@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "www.unitedrugby.com",
       },
+      {
+        protocol: "https",
+        hostname: "www.ruck.co.uk",
+      },
     ],
   },
 };

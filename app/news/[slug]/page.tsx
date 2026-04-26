@@ -88,6 +88,14 @@ export default async function NewsArticlePage({
     .filter(Boolean);
   const readableParagraphs =
     contentParagraphs.length > 0 ? contentParagraphs : [article.content];
+  const sourceName =
+    "sourceName" in article && typeof article.sourceName === "string"
+      ? article.sourceName
+      : "";
+  const sourceUrl =
+    "sourceUrl" in article && typeof article.sourceUrl === "string"
+      ? article.sourceUrl
+      : "";
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -171,6 +179,19 @@ export default async function NewsArticlePage({
               українського читача. Якщо тема ще розвивається, текст може
               оновлюватися після публікації.
             </p>
+            {sourceName && sourceUrl ? (
+              <p className="mt-2">
+                Джерело:{" "}
+                <a
+                  href={sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-[var(--accent)] underline-offset-2 hover:underline"
+                >
+                  {sourceName}
+                </a>
+              </p>
+            ) : null}
           </div>
 
           <div className="rounded-[1.5rem] bg-slate-50/80 p-5 sm:p-6">
