@@ -13,6 +13,7 @@ import { getApiRugbyStandingsResult } from "@/lib/api-rugby";
 import {
   championships as championshipOverrides,
   getChampionshipCanonicalSlug,
+  findChampionshipOverride,
   findChampionshipOverrideBySlug,
 } from "@/lib/championship-data";
 import { FallbackState } from "@/components/fallback-state";
@@ -87,8 +88,12 @@ export async function generateMetadata({
   params,
 }: ChampionshipPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const championshipOverride = findChampionshipOverrideBySlug(slug);
   const championshipBySlug = await getChampionshipBySlug(slug);
+  const championshipOverride =
+    findChampionshipOverrideBySlug(slug) ??
+    (championshipBySlug
+      ? findChampionshipOverride({ title: championshipBySlug.title })
+      : undefined);
   const championshipByTitle =
     championshipOverride && !championshipBySlug
       ? await getChampionshipByTitle(championshipOverride.title)
@@ -164,8 +169,12 @@ export default async function ChampionshipPage({
   params,
 }: ChampionshipPageProps) {
   const { slug } = await params;
-  const championshipOverride = findChampionshipOverrideBySlug(slug);
   const championshipBySlug = await getChampionshipBySlug(slug);
+  const championshipOverride =
+    findChampionshipOverrideBySlug(slug) ??
+    (championshipBySlug
+      ? findChampionshipOverride({ title: championshipBySlug.title })
+      : undefined);
   const championshipByTitle =
     championshipOverride && !championshipBySlug
       ? await getChampionshipByTitle(championshipOverride.title)

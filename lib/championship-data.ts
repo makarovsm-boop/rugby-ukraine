@@ -134,9 +134,9 @@ export function findChampionshipOverrideBySlug(slug?: string) {
 
 export const championships: Championship[] = [
   {
-    slug: "rugby-world-cup-2027",
-    title: "Rugby World Cup 2027",
-    aliases: ["World Rugby cup 2027", "World Rugby Cup 2027", "RWC 2027"],
+    slug: "world-rugby",
+    title: "World Rugby",
+    aliases: ["World Rugby cup 2027", "World Rugby Cup 2027", "Rugby World Cup 2027", "RWC 2027"],
     season: "2027",
     region: "Світ",
     format: "Збірні",

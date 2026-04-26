@@ -10,6 +10,7 @@ import {
 } from "@/lib/db";
 import {
   championships as championshipOverrides,
+  findChampionshipOverride,
   getChampionshipCanonicalSlug,
   findChampionshipOverrideBySlug,
 } from "@/lib/championship-data";
@@ -35,8 +36,10 @@ function buildChampionshipsHref(region?: string) {
   return region ? `/championships?region=${encodeURIComponent(region)}` : "/championships";
 }
 
-function getOverrideNextMatch(slug: string) {
-  const championshipOverride = findChampionshipOverrideBySlug(slug);
+function getOverrideNextMatch(input: { slug: string; title: string }) {
+  const championshipOverride =
+    findChampionshipOverrideBySlug(input.slug) ??
+    findChampionshipOverride({ title: input.title });
   return championshipOverride?.matches.find((match) => match.teams.includes(" vs "));
 }
 
@@ -79,7 +82,8 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
             getChampionshipCanonicalSlug({
               slug: championship.slug,
               title: championship.title,
-            }) === override.slug,
+            }) === override.slug ||
+            championship.title === override.title,
         ),
       )
       .filter((override) => (region ? override.region === region : true))
@@ -169,7 +173,7 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
           {await Promise.all(championships.map(async (championship, index) => {
             const championshipOverride = findChampionshipOverrideBySlug(
               championship.slug,
-            );
+            ) ?? findChampionshipOverride({ title: championship.title });
             const displayChampionship = championship;
             const imageValue =
               championship.slug === "european-championship" &&
@@ -184,7 +188,7 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
             );
             const nextMatch = championship.matches[0];
             const overrideNextMatch = getOverrideNextMatch(
-              championship.slug,
+              { slug: championship.slug, title: championship.title },
             );
             const matchesCount =
               championshipOverride?.matches.length && championshipOverride.matches.length > 0

@@ -61,7 +61,8 @@ export default async function AdminChampionshipsPage({
             getChampionshipCanonicalSlug({
               slug: championship.slug,
               title: championship.title,
-            }) === override.slug,
+            }) === override.slug ||
+            championship.title === override.title,
         ),
       )
       .map((override) => ({
