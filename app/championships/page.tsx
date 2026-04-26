@@ -158,17 +158,7 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
             const championshipOverride = findChampionshipOverrideBySlug(
               championship.slug,
             );
-            const displayChampionship = championshipOverride
-              ? {
-                  ...championship,
-                  title: championshipOverride.title,
-                  season: championshipOverride.season,
-                  region: championshipOverride.region,
-                  format: championshipOverride.format,
-                  description: championshipOverride.description,
-                  image: championshipOverride.image,
-                }
-              : championship;
+            const displayChampionship = championship;
             const safeImage = await getSafeImagePath(
               displayChampionship.image,
               "championships",

@@ -54,17 +54,7 @@ export async function generateMetadata({
   }
 
   const displayChampionship = championship
-    ? championshipOverride
-      ? {
-          ...championship,
-          title: championshipOverride.title,
-          season: championshipOverride.season,
-          region: championshipOverride.region,
-          format: championshipOverride.format,
-          description: championshipOverride.description,
-          image: championshipOverride.image,
-        }
-      : championship
+    ? championship
     : {
         id: championshipOverride!.slug,
         slug: championshipOverride!.slug,
@@ -114,17 +104,7 @@ export default async function ChampionshipPage({
   }
 
   const displayChampionship = championship
-    ? championshipOverride
-      ? {
-          ...championship,
-          title: championshipOverride.title,
-          season: championshipOverride.season,
-          region: championshipOverride.region,
-          format: championshipOverride.format,
-          description: championshipOverride.description,
-          image: championshipOverride.image,
-        }
-      : championship
+    ? championship
     : {
         id: championshipOverride!.slug,
         slug: championshipOverride!.slug,
