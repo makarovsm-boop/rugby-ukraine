@@ -195,10 +195,10 @@ export const championships: Championship[] = [
     ],
     matches: [
       {
-        round: "26 квітня 2026 · наживо",
-        teams: "Gloucester Rugby 34:28 Exeter Chiefs",
-        date: "Kingsholm · матч триває",
-        location: "Поточний рахунок у прямому ефірі Gallagher PREM",
+        round: "26 квітня 2026 · результат",
+        teams: "Gloucester Rugby 34:31 Exeter Chiefs",
+        date: "Kingsholm",
+        location: "Матч завершено у Gallagher PREM",
       },
       {
         round: "25 квітня 2026 · результат",
