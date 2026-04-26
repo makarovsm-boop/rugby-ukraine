@@ -1,0 +1,18 @@
+<svg width="1200" height="750" viewBox="0 0 1200 750" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="750" rx="36" fill="#F6F8FC"/>
+  <rect x="62" y="78" width="1076" height="594" rx="34" fill="#0B1730"/>
+  <circle cx="986" cy="186" r="94" fill="#153A7A" fill-opacity="0.9"/>
+  <circle cx="218" cy="520" r="96" fill="#1B6F5C" fill-opacity="0.45"/>
+  <circle cx="892" cy="516" r="72" fill="#7A1636" fill-opacity="0.65"/>
+  <path d="M286 231C286 211.118 302.118 195 322 195H878C897.882 195 914 211.118 914 231V519C914 538.882 897.882 555 878 555H322C302.118 555 286 538.882 286 519V231Z" fill="#101E3D"/>
+  <g opacity="0.95">
+    <circle cx="411" cy="329" r="47" fill="#154284"/>
+    <circle cx="503" cy="286" r="47" fill="#1B6F5C"/>
+    <circle cx="600" cy="258" r="47" fill="#E7ECF7"/>
+    <circle cx="697" cy="286" r="47" fill="#7A1636"/>
+    <circle cx="789" cy="329" r="47" fill="#2A8CFF"/>
+    <circle cx="600" cy="366" r="47" fill="#233A6B"/>
+  </g>
+  <text x="330" y="451" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="78" font-weight="700">Six Nations</text>
+  <text x="334" y="504" fill="#AAB7D4" font-family="Arial, sans-serif" font-size="30" font-weight="600">Фінальна таблиця та підсумки сезону</text>
+</svg>

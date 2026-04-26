@@ -34,13 +34,30 @@ function getOverrideNextMatch(slug: string, title: string) {
   return championshipOverride?.matches.find((match) => match.teams.includes(" vs "));
 }
 
+const championshipPriority: Record<string, number> = {
+  "investec champions cup": 1,
+  "premiership rugby": 2,
+  "united rugby championship": 3,
+  "six nations": 4,
+  "чемпіонат європи": 5,
+};
+
+function normalizeKey(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9а-яіїєґ]+/gi, " ")
+    .trim();
+}
+
 export default async function ChampionshipsPage({ searchParams }: ChampionshipsPageProps) {
   const { region } = await searchParams;
   const [dbChampionships, dbRegions] = await Promise.all([
     getChampionshipsByRegion(region),
     getChampionshipRegions(),
   ]);
-  const championships = [
+  const mergedChampionships = [
     ...dbChampionships,
     ...championshipOverrides
       .filter((override) =>
@@ -62,7 +79,27 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
         image: override.image,
         matches: [],
       })),
-  ].sort((a, b) => a.title.localeCompare(b.title, "uk"));
+  ];
+  const uniqueChampionships = new Map<string, (typeof mergedChampionships)[number]>();
+
+  for (const championship of mergedChampionships) {
+    const key = normalizeKey(championship.title);
+
+    if (!uniqueChampionships.has(key)) {
+      uniqueChampionships.set(key, championship);
+    }
+  }
+
+  const championships = [...uniqueChampionships.values()].sort((a, b) => {
+    const aPriority = championshipPriority[normalizeKey(a.title)] ?? 99;
+    const bPriority = championshipPriority[normalizeKey(b.title)] ?? 99;
+
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+
+    return a.title.localeCompare(b.title, "uk");
+  });
   const regions = [...new Set([...dbRegions, ...championshipOverrides.map((item) => item.region)])]
     .sort((a, b) => a.localeCompare(b, "uk"));
 

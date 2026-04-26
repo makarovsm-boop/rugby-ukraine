@@ -249,7 +249,7 @@ export const championships: Championship[] = [
     format: "Збірні",
     description:
       "Найпрестижніший щорічний турнір збірних Північної півкулі. Сезон 2026 уже завершено, тож на сторінці показуємо фінальну таблицю та підсумкові результати.",
-    image: "/fallback-championship.svg",
+    image: "/championship-six-nations.svg",
     standings: [
       { position: 1, name: "Франція", played: 5, won: 4, lost: 1, points: 21 },
       { position: 2, name: "Ірландія", played: 5, won: 4, lost: 1, points: 19 },
