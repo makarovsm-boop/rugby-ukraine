@@ -13,6 +13,10 @@ import {
   createSlug,
   requireAdmin,
 } from "@/lib/admin";
+import {
+  findChampionshipOverrideBySlug,
+  getChampionshipCanonicalSlug,
+} from "@/lib/championship-data";
 
 export async function createChampionship(formData: FormData) {
   await requireAdmin();
@@ -108,9 +112,28 @@ export async function updateChampionship(slug: string, formData: FormData) {
     );
   }
 
+  const slugBase = createSlug(title);
+  let nextSlug = slugBase;
+  let counter = 1;
+
+  while (true) {
+    const existingChampionship = await prisma.championship.findUnique({
+      where: { slug: nextSlug },
+      select: { slug: true },
+    });
+
+    if (!existingChampionship || existingChampionship.slug === slug) {
+      break;
+    }
+
+    counter += 1;
+    nextSlug = `${slugBase}-${counter}`;
+  }
+
   await prisma.championship.update({
     where: { slug },
     data: {
+      slug: nextSlug,
       title,
       region,
       format,
@@ -124,9 +147,91 @@ export async function updateChampionship(slug: string, formData: FormData) {
   revalidatePath("/");
   revalidatePath("/search");
   revalidatePath(`/championships/${slug}`);
+  revalidatePath(`/championships/${nextSlug}`);
   revalidatePath("/admin/championships");
   revalidatePath(`/admin/championships/${slug}`);
   redirectWithFormSuccess("/admin/championships", "Зміни до чемпіонату збережено.");
+}
+
+export async function createChampionshipFromOverride(slug: string) {
+  await requireAdmin();
+
+  const override = findChampionshipOverrideBySlug(slug);
+
+  if (!override) {
+    redirectWithFormError(
+      "/admin/championships",
+      "Не вдалося знайти шаблон чемпіонату для додавання.",
+    );
+  }
+
+  const existingByTitle = await prisma.championship.findFirst({
+    where: { title: override.title },
+    select: { id: true },
+  });
+
+  if (existingByTitle) {
+    redirectWithFormSuccess(
+      "/admin/championships",
+      "Такий чемпіонат уже є в адмінці.",
+    );
+  }
+
+  const existingBySlug = await prisma.championship.findUnique({
+    where: { slug: override.slug },
+    select: { slug: true, title: true },
+  });
+
+  if (existingBySlug) {
+    const normalizedSlug = getChampionshipCanonicalSlug({
+      slug: existingBySlug.slug,
+      title: existingBySlug.title,
+    });
+
+    if (normalizedSlug !== override.slug) {
+      const conflictingSlug = await prisma.championship.findUnique({
+        where: { slug: normalizedSlug },
+        select: { slug: true },
+      });
+
+      if (!conflictingSlug) {
+        await prisma.championship.update({
+          where: { slug: existingBySlug.slug },
+          data: { slug: normalizedSlug },
+        });
+      }
+    }
+  }
+
+  let nextSlug = override.slug;
+  let counter = 1;
+
+  while (await prisma.championship.findUnique({ where: { slug: nextSlug } })) {
+    counter += 1;
+    nextSlug = `${override.slug}-${counter}`;
+  }
+
+  await prisma.championship.create({
+    data: {
+      id: createChampionshipId(),
+      slug: nextSlug,
+      title: override.title,
+      region: override.region,
+      format: override.format,
+      description: override.description,
+      season: override.season,
+      image: override.image,
+    },
+  });
+
+  revalidatePath("/championships");
+  revalidatePath("/");
+  revalidatePath("/search");
+  revalidatePath("/admin/championships");
+  redirectWithFormSuccess(
+    "/admin/championships",
+    "Шаблон чемпіонату додано в адмінку.",
+  );
 }
 
 export async function deleteChampionship(slug: string) {

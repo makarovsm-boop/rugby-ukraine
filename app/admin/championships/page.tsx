@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   createChampionship,
+  createChampionshipFromOverride,
   deleteChampionship,
 } from "@/app/admin/championships/actions";
 import { AdminPageHeader } from "@/components/admin-page-header";
@@ -18,7 +19,11 @@ import {
   getFormErrorMessage,
   getFormSuccessMessage,
 } from "@/lib/admin-form-errors";
-import { getChampionshipPreviewSlug } from "@/lib/championship-data";
+import {
+  championships as championshipOverrides,
+  getChampionshipCanonicalSlug,
+  getChampionshipPreviewSlug,
+} from "@/lib/championship-data";
 import { getAdminChampionships } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin";
 
@@ -40,6 +45,39 @@ export default async function AdminChampionshipsPage({
   await requireAdmin();
   const { error, success } = await searchParams;
   const championships = await getAdminChampionships();
+  const adminChampionships = [
+    ...championships.map((championship) => ({
+      ...championship,
+      source: "db" as const,
+      canonicalSlug: getChampionshipCanonicalSlug({
+        slug: championship.slug,
+        title: championship.title,
+      }),
+    })),
+    ...championshipOverrides
+      .filter((override) =>
+        !championships.some(
+          (championship) =>
+            getChampionshipCanonicalSlug({
+              slug: championship.slug,
+              title: championship.title,
+            }) === override.slug,
+        ),
+      )
+      .map((override) => ({
+        id: `override-${override.slug}`,
+        slug: override.slug,
+        canonicalSlug: override.slug,
+        title: override.title,
+        season: override.season,
+        region: override.region,
+        format: override.format,
+        description: override.description,
+        image: override.image,
+        matches: [],
+        source: "override" as const,
+      })),
+  ].sort((a, b) => a.title.localeCompare(b.title, "uk"));
   const errorMessage = getFormErrorMessage(error);
   const successMessage = getFormSuccessMessage(success);
 
@@ -97,10 +135,10 @@ export default async function AdminChampionshipsPage({
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold text-slate-950">Усі чемпіонати</h2>
 
-        {championships.map((championship) => (
+        {adminChampionships.map((championship) => (
           (() => {
             const previewSlug = getChampionshipPreviewSlug({
-              slug: championship.slug,
+              slug: championship.canonicalSlug,
               title: championship.title,
             });
 
@@ -129,6 +167,11 @@ export default async function AdminChampionshipsPage({
                 <div className="flex flex-wrap gap-4 text-sm text-slate-500">
                   <span>Матчів: {championship.matches.length}</span>
                   <span>Зображення: {championship.image}</span>
+                  {championship.source === "override" ? (
+                    <span className="font-medium text-amber-700">
+                      Шаблон, ще не доданий у базу
+                    </span>
+                  ) : null}
                 </div>
               </div>
 
@@ -139,20 +182,38 @@ export default async function AdminChampionshipsPage({
                 >
                   Перегляд
                 </Link>
-                <Link
-                  href={`/admin/championships/${championship.slug}`}
-                  className="dark-pill-button inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
-                >
-                  Редагувати
-                </Link>
-                <form action={deleteChampionship.bind(null, championship.slug)}>
-                  <button
-                    type="submit"
-                    className="inline-flex rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition-colors hover:border-rose-300 hover:bg-rose-100"
+                {championship.source === "db" ? (
+                  <>
+                    <Link
+                      href={`/admin/championships/${championship.slug}`}
+                      className="dark-pill-button inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
+                    >
+                      Редагувати
+                    </Link>
+                    <form action={deleteChampionship.bind(null, championship.slug)}>
+                      <button
+                        type="submit"
+                        className="inline-flex rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition-colors hover:border-rose-300 hover:bg-rose-100"
+                      >
+                        Видалити
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <form
+                    action={createChampionshipFromOverride.bind(
+                      null,
+                      championship.slug,
+                    )}
                   >
-                    Видалити
-                  </button>
-                </form>
+                    <button
+                      type="submit"
+                      className="dark-pill-button inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
+                    >
+                      Додати в адмінку
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
           </article>

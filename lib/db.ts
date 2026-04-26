@@ -433,6 +433,21 @@ export async function getChampionshipBySlug(slug: string) {
   });
 }
 
+export async function getChampionshipByTitle(title: string) {
+  return prisma.championship.findFirst({
+    where: { title },
+    include: {
+      matches: {
+        include: {
+          homeTeam: true,
+          awayTeam: true,
+        },
+        orderBy: { date: "asc" },
+      },
+    },
+  });
+}
+
 export async function getAdminChampionships() {
   return prisma.championship.findMany({
     include: {

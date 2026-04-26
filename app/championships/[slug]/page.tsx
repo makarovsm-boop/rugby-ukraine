@@ -6,12 +6,13 @@ import {
   buildStandings,
   formatDateTime,
   getChampionshipBySlug,
+  getChampionshipByTitle,
   getChampionships,
 } from "@/lib/db";
 import { getApiRugbyStandingsResult } from "@/lib/api-rugby";
 import {
   championships as championshipOverrides,
-  findChampionshipOverride,
+  getChampionshipCanonicalSlug,
   findChampionshipOverrideBySlug,
 } from "@/lib/championship-data";
 import { FallbackState } from "@/components/fallback-state";
@@ -44,8 +45,26 @@ export async function generateMetadata({
   params,
 }: ChampionshipPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const championship = await getChampionshipBySlug(slug);
   const championshipOverride = findChampionshipOverrideBySlug(slug);
+  const championshipBySlug = await getChampionshipBySlug(slug);
+  const championshipByTitle =
+    championshipOverride && !championshipBySlug
+      ? await getChampionshipByTitle(championshipOverride.title)
+      : null;
+  const championship =
+    championshipBySlug &&
+    getChampionshipCanonicalSlug({
+      slug: championshipBySlug.slug,
+      title: championshipBySlug.title,
+    }) === slug
+      ? championshipBySlug
+      : championshipByTitle &&
+          getChampionshipCanonicalSlug({
+            slug: championshipByTitle.slug,
+            title: championshipByTitle.title,
+          }) === slug
+        ? championshipByTitle
+        : null;
 
   if (!championship && !championshipOverride) {
     return {
@@ -96,8 +115,26 @@ export default async function ChampionshipPage({
   params,
 }: ChampionshipPageProps) {
   const { slug } = await params;
-  const championship = await getChampionshipBySlug(slug);
   const championshipOverride = findChampionshipOverrideBySlug(slug);
+  const championshipBySlug = await getChampionshipBySlug(slug);
+  const championshipByTitle =
+    championshipOverride && !championshipBySlug
+      ? await getChampionshipByTitle(championshipOverride.title)
+      : null;
+  const championship =
+    championshipBySlug &&
+    getChampionshipCanonicalSlug({
+      slug: championshipBySlug.slug,
+      title: championshipBySlug.title,
+    }) === slug
+      ? championshipBySlug
+      : championshipByTitle &&
+          getChampionshipCanonicalSlug({
+            slug: championshipByTitle.slug,
+            title: championshipByTitle.title,
+          }) === slug
+        ? championshipByTitle
+        : null;
 
   if (!championship && !championshipOverride) {
     notFound();

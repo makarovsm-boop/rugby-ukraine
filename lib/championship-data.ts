@@ -90,6 +90,27 @@ export function getChampionshipPreviewSlug(input: {
   return findChampionshipOverride(input)?.slug ?? input.slug ?? "";
 }
 
+export function getChampionshipCanonicalSlug(input: {
+  slug?: string;
+  title?: string;
+}) {
+  const byTitle = input.title
+    ? championships.find((entry) => {
+        const titleKeys = [entry.title, ...(entry.aliases ?? [])].map(
+          normalizeChampionshipKey,
+        );
+
+        return titleKeys.includes(normalizeChampionshipKey(input.title!));
+      })
+    : undefined;
+
+  if (byTitle) {
+    return byTitle.slug;
+  }
+
+  return findChampionshipOverride(input)?.slug ?? input.slug ?? "";
+}
+
 export function findChampionshipOverrideBySlug(slug?: string) {
   if (!slug) {
     return undefined;

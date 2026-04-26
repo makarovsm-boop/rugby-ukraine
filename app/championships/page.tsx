@@ -9,7 +9,7 @@ import {
 } from "@/lib/db";
 import {
   championships as championshipOverrides,
-  findChampionshipOverride,
+  getChampionshipCanonicalSlug,
   findChampionshipOverrideBySlug,
 } from "@/lib/championship-data";
 import { getSafeImagePath } from "@/lib/media";
@@ -62,12 +62,22 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
     getChampionshipRegions(),
   ]);
   const mergedChampionships = [
-    ...dbChampionships,
+    ...dbChampionships.map((championship) => ({
+      ...championship,
+      slug: getChampionshipCanonicalSlug({
+        slug: championship.slug,
+        title: championship.title,
+      }),
+    })),
     ...championshipOverrides
       .filter((override) => override.slug !== "champions-cup")
       .filter((override) =>
         !dbChampionships.some(
-          (championship) => championship.slug === override.slug,
+          (championship) =>
+            getChampionshipCanonicalSlug({
+              slug: championship.slug,
+              title: championship.title,
+            }) === override.slug,
         ),
       )
       .filter((override) => (region ? override.region === region : true))
