@@ -16,6 +16,19 @@ export type Championship = {
     lost: number | null;
     points: number;
   }[];
+  groupTables?: {
+    name: string;
+    standings: {
+      position: number;
+      name: string;
+      logo?: string;
+      played: number;
+      won: number;
+      draw: number;
+      lost: number;
+      points: number;
+    }[];
+  }[];
   matches: {
     round: string;
     teams: string;
@@ -120,6 +133,75 @@ export function findChampionshipOverrideBySlug(slug?: string) {
 }
 
 export const championships: Championship[] = [
+  {
+    slug: "rugby-world-cup-2027",
+    title: "Rugby World Cup 2027",
+    aliases: ["World Rugby cup 2027", "World Rugby Cup 2027", "RWC 2027"],
+    season: "2027",
+    region: "Світ",
+    format: "Збірні",
+    description:
+      "Чоловічий Кубок світу з регбі 2027 в Австралії. На офіційній сторінці пулів уже відомий склад усіх шести груп, тому тут показуємо саме груповий розподіл збірних.",
+    image: "/fallback-championship.svg",
+    standings: [],
+    groupTables: [
+      {
+        name: "Pool A",
+        standings: [
+          { position: 1, name: "New Zealand", logo: "https://flagcdn.com/nz.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 2, name: "Australia", logo: "https://flagcdn.com/au.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 3, name: "Chile", logo: "https://flagcdn.com/cl.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 4, name: "Hong Kong China", logo: "https://flagcdn.com/hk.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+        ],
+      },
+      {
+        name: "Pool B",
+        standings: [
+          { position: 1, name: "South Africa", logo: "https://flagcdn.com/za.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 2, name: "Italy", logo: "https://flagcdn.com/it.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 3, name: "Georgia", logo: "https://flagcdn.com/ge.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 4, name: "Romania", logo: "https://flagcdn.com/ro.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+        ],
+      },
+      {
+        name: "Pool C",
+        standings: [
+          { position: 1, name: "Argentina", logo: "https://flagcdn.com/ar.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 2, name: "Fiji", logo: "https://flagcdn.com/fj.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 3, name: "Spain", logo: "https://flagcdn.com/es.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 4, name: "Canada", logo: "https://flagcdn.com/ca.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+        ],
+      },
+      {
+        name: "Pool D",
+        standings: [
+          { position: 1, name: "Ireland", logo: "https://flagcdn.com/ie.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 2, name: "Scotland", logo: "https://flagcdn.com/gb-sct.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 3, name: "Uruguay", logo: "https://flagcdn.com/uy.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 4, name: "Portugal", logo: "https://flagcdn.com/pt.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+        ],
+      },
+      {
+        name: "Pool E",
+        standings: [
+          { position: 1, name: "France", logo: "https://flagcdn.com/fr.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 2, name: "Japan", logo: "https://flagcdn.com/jp.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 3, name: "USA", logo: "https://flagcdn.com/us.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 4, name: "Samoa", logo: "https://flagcdn.com/ws.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+        ],
+      },
+      {
+        name: "Pool F",
+        standings: [
+          { position: 1, name: "England", logo: "https://flagcdn.com/gb-eng.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 2, name: "Wales", logo: "https://flagcdn.com/gb-wls.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 3, name: "Tonga", logo: "https://flagcdn.com/to.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+          { position: 4, name: "Zimbabwe", logo: "https://flagcdn.com/zw.svg", played: 0, won: 0, draw: 0, lost: 0, points: 0 },
+        ],
+      },
+    ],
+    matches: [],
+  },
   {
     slug: "european-championship",
     title: "Чемпіонат Європи",

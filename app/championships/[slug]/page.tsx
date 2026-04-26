@@ -225,6 +225,7 @@ export default async function ChampionshipPage({
     championshipOverride?.standings.length
       ? championshipOverride.standings
       : apiRugbyStandings.rows ?? fallbackStandings;
+  const groupTables = championshipOverride?.groupTables ?? [];
   const championshipLogoMap = buildChampionshipLogoMap(
     championshipOverride?.standings,
   );
@@ -232,6 +233,7 @@ export default async function ChampionshipPage({
   const isChampionsCupPlayoffs =
     displayChampionship.slug === "investec-champions-cup" ||
     displayChampionship.slug === "champions-cup";
+  const hasGroupTables = groupTables.length > 0;
   const semifinalPairs = isChampionsCupPlayoffs
     ? championshipMatchesOverride.filter((match) => match.round.includes("півфінал"))
     : [];
@@ -315,16 +317,20 @@ export default async function ChampionshipPage({
         <section className="space-y-5">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.16em] text-[var(--accent)]">
-              {isChampionsCupPlayoffs ? "Плей-оф" : "Таблиця"}
+              {isChampionsCupPlayoffs ? "Плей-оф" : hasGroupTables ? "Групи" : "Таблиця"}
             </p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950">
               {isChampionsCupPlayoffs
                 ? "Півфінальні пари"
+                : hasGroupTables
+                  ? "Турнірні групи"
                 : "Поточне становище команд"}
             </h2>
             <p className="mt-3 text-sm text-slate-500">
               {isChampionsCupPlayoffs
                 ? "Замість таблиці для цього турніру показуємо актуальні півфінальні пари плей-оф за офіційною сторінкою EPCR."
+                : hasGroupTables
+                  ? "Офіційний склад пулів Rugby World Cup 2027. До старту турніру всі показники в групах ще нульові."
                 : standingsMessage}
             </p>
           </div>
@@ -385,6 +391,58 @@ export default async function ChampionshipPage({
                 description="Для цього етапу плей-оф ще не додано актуальні пари."
               />
             )
+          ) : hasGroupTables ? (
+            <div className="grid gap-4">
+              {groupTables.map((group) => (
+                <article
+                  key={group.name}
+                  className="content-card overflow-hidden rounded-[1.5rem]"
+                >
+                  <div className="border-b border-slate-100 bg-slate-50 px-5 py-4">
+                    <h3 className="text-lg font-semibold text-slate-950">
+                      {group.name}
+                    </h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full border-collapse text-left">
+                      <thead className="bg-white text-sm text-slate-500">
+                        <tr>
+                          <th className="px-4 py-4 font-medium">#</th>
+                          <th className="px-4 py-4 font-medium">Команда</th>
+                          <th className="px-4 py-4 font-medium">І</th>
+                          <th className="px-4 py-4 font-medium">В</th>
+                          <th className="px-4 py-4 font-medium">Н</th>
+                          <th className="px-4 py-4 font-medium">П</th>
+                          <th className="px-4 py-4 font-medium">О</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {group.standings.map((team) => (
+                          <tr
+                            key={`${group.name}-${team.name}`}
+                            className="border-t border-slate-100 text-sm text-slate-700"
+                          >
+                            <td className="px-4 py-4 font-semibold text-slate-950">
+                              {team.position}
+                            </td>
+                            <td className="px-4 py-4 font-medium text-slate-950">
+                              <TeamBadge name={team.name} logo={team.logo} />
+                            </td>
+                            <td className="px-4 py-4">{team.played}</td>
+                            <td className="px-4 py-4">{team.won}</td>
+                            <td className="px-4 py-4">{team.draw}</td>
+                            <td className="px-4 py-4">{team.lost}</td>
+                            <td className="px-4 py-4 font-semibold text-[var(--accent)]">
+                              {team.points}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+              ))}
+            </div>
           ) : standings.length > 0 ? (
             <div className="content-card overflow-hidden rounded-[1.5rem]">
               <div className="overflow-x-auto">

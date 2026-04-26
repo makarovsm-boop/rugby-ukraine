@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "www.ruck.co.uk",
       },
+      {
+        protocol: "https",
+        hostname: "flagcdn.com",
+      },
     ],
   },
 };
