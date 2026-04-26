@@ -184,6 +184,15 @@ export default async function ChampionshipPage({
       ? championshipOverride.standings
       : apiRugbyStandings.rows ?? fallbackStandings;
   const championshipMatchesOverride = championshipOverride?.matches ?? [];
+  const isChampionsCupPlayoffs =
+    displayChampionship.slug === "investec-champions-cup" ||
+    displayChampionship.slug === "champions-cup";
+  const semifinalPairs = isChampionsCupPlayoffs
+    ? championshipMatchesOverride.filter((match) => match.round.includes("півфінал"))
+    : [];
+  const playoffResults = isChampionsCupPlayoffs
+    ? championshipMatchesOverride.filter((match) => !match.round.includes("півфінал"))
+    : championshipMatchesOverride;
   const matchesCount =
     championshipMatchesOverride.length > 0
       ? championshipMatchesOverride.length
@@ -261,17 +270,51 @@ export default async function ChampionshipPage({
         <section className="space-y-5">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.16em] text-[var(--accent)]">
-              Таблиця
+              {isChampionsCupPlayoffs ? "Плей-оф" : "Таблиця"}
             </p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-              Поточне становище команд
+              {isChampionsCupPlayoffs
+                ? "Півфінальні пари"
+                : "Поточне становище команд"}
             </h2>
             <p className="mt-3 text-sm text-slate-500">
-              {standingsMessage}
+              {isChampionsCupPlayoffs
+                ? "Замість таблиці для цього турніру показуємо актуальні півфінальні пари плей-оф за офіційною сторінкою EPCR."
+                : standingsMessage}
             </p>
           </div>
 
-          {standings.length > 0 ? (
+          {isChampionsCupPlayoffs ? (
+            semifinalPairs.length > 0 ? (
+              <div className="space-y-4">
+                {semifinalPairs.map((match) => (
+                  <article
+                    key={`${match.round}-${match.teams}`}
+                    className="content-card rounded-[1.5rem] p-5"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-sm text-slate-500">{match.round}</p>
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        Офіційний анонс EPCR
+                      </span>
+                    </div>
+                    <div className="mt-3 space-y-3">
+                      <h3 className="text-xl font-semibold leading-tight text-slate-950">
+                        {match.teams}
+                      </h3>
+                      <p className="text-sm text-slate-600">{match.date}</p>
+                      <p className="text-sm text-slate-500">{match.location}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <FallbackState
+                title="Півфінальні пари поки недоступні"
+                description="Для цього етапу плей-оф ще не додано актуальні пари."
+              />
+            )
+          ) : standings.length > 0 ? (
             <div className="content-card overflow-hidden rounded-[1.5rem]">
               <div className="overflow-x-auto">
                 <table className="min-w-full border-collapse text-left">
@@ -327,9 +370,9 @@ export default async function ChampionshipPage({
             </h2>
           </div>
 
-          {championshipMatchesOverride.length > 0 ? (
+          {playoffResults.length > 0 ? (
             <div className="space-y-4">
-              {championshipMatchesOverride.map((match) => (
+              {playoffResults.map((match) => (
                 <article
                   key={`${match.round}-${match.teams}`}
                   className="content-card rounded-[1.5rem] p-5"
