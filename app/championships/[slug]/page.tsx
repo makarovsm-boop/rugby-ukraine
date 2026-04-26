@@ -85,9 +85,16 @@ export async function generateMetadata({
         image: championshipOverride!.image,
         matches: [],
       };
+  const imageValue =
+    displayChampionship.slug === "european-championship" &&
+    (!displayChampionship.image ||
+      displayChampionship.image === "/championship-europe.svg" ||
+      displayChampionship.image === "/fallback-championship.svg")
+      ? championshipOverride?.image ?? displayChampionship.image
+      : displayChampionship.image;
 
   const safeImage = await getSafeImagePath(
-    displayChampionship.image,
+    imageValue,
     "championships",
   );
 
@@ -153,9 +160,16 @@ export default async function ChampionshipPage({
         image: championshipOverride!.image,
         matches: [],
       };
+  const imageValue =
+    displayChampionship.slug === "european-championship" &&
+    (!displayChampionship.image ||
+      displayChampionship.image === "/championship-europe.svg" ||
+      displayChampionship.image === "/fallback-championship.svg")
+      ? championshipOverride?.image ?? displayChampionship.image
+      : displayChampionship.image;
 
   const safeImage = await getSafeImagePath(
-    displayChampionship.image,
+    imageValue,
     "championships",
   );
 

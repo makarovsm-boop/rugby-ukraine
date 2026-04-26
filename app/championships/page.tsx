@@ -169,8 +169,15 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
               championship.slug,
             );
             const displayChampionship = championship;
+            const imageValue =
+              championship.slug === "european-championship" &&
+              (!displayChampionship.image ||
+                displayChampionship.image === "/championship-europe.svg" ||
+                displayChampionship.image === "/fallback-championship.svg")
+                ? championshipOverride?.image ?? displayChampionship.image
+                : displayChampionship.image;
             const safeImage = await getSafeImagePath(
-              displayChampionship.image,
+              imageValue,
               "championships",
             );
             const nextMatch = championship.matches[0];

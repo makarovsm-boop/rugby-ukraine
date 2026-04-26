@@ -128,7 +128,7 @@ export const championships: Championship[] = [
     format: "Збірні",
     description:
       "Міжнародний турнір для національних збірних, де команди змагаються за статус і важливі рейтингові позиції в європейському регбі.",
-    image: "/championship-europe.svg",
+    image: "/championship-europe.jpeg",
     standings: [
       { position: 1, name: "Грузія", played: 4, won: 4, lost: 0, points: 19 },
       { position: 2, name: "Румунія", played: 4, won: 3, lost: 1, points: 15 },
