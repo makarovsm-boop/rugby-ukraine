@@ -18,6 +18,7 @@ import {
   getFormErrorMessage,
   getFormSuccessMessage,
 } from "@/lib/admin-form-errors";
+import { getChampionshipPreviewSlug } from "@/lib/championship-data";
 import { getAdminChampionships } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin";
 
@@ -97,6 +98,13 @@ export default async function AdminChampionshipsPage({
         <h2 className="text-2xl font-semibold text-slate-950">Усі чемпіонати</h2>
 
         {championships.map((championship) => (
+          (() => {
+            const previewSlug = getChampionshipPreviewSlug({
+              slug: championship.slug,
+              title: championship.title,
+            });
+
+            return (
           <article
             key={championship.id}
             className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(11,31,58,0.05)]"
@@ -126,7 +134,7 @@ export default async function AdminChampionshipsPage({
 
               <div className="flex gap-3">
                 <Link
-                  href={`/championships/${championship.slug}`}
+                  href={`/championships/${previewSlug}`}
                   className="inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
                 >
                   Перегляд
@@ -148,6 +156,8 @@ export default async function AdminChampionshipsPage({
               </div>
             </div>
           </article>
+            );
+          })()
         ))}
       </section>
     </div>
