@@ -6,6 +6,7 @@ import {
   formatDateTime,
   getHomePageData,
 } from "@/lib/db";
+import { championships as championshipOverrides } from "@/lib/championship-data";
 import {
   getMatchStatusClasses,
   getMatchStatusLabel,
@@ -28,6 +29,26 @@ export const metadata: Metadata = {
   },
 };
 
+function getEditorialLiveMatch() {
+  for (const championship of championshipOverrides) {
+    const liveMatch = championship.matches.find((match) =>
+      match.round.toLowerCase().includes("наживо"),
+    );
+
+    if (liveMatch) {
+      return {
+        championshipTitle: championship.title,
+        championshipSlug: championship.slug,
+        round: liveMatch.round,
+        teams: liveMatch.teams,
+        date: liveMatch.date,
+      };
+    }
+  }
+
+  return null;
+}
+
 export default async function Home() {
   const { articles, championships, teams, matches, results } =
     await getHomePageData();
@@ -35,6 +56,7 @@ export default async function Home() {
     teams.find((team) => team.country === "Україна" || team.level === "Збірна") ??
     teams[0];
   const featuredArticle = articles[0];
+  const editorialLiveMatch = getEditorialLiveMatch();
   const featuredMatch = matches[0];
 
   return (
@@ -81,30 +103,48 @@ export default async function Home() {
           <div className="rounded-[1.5rem] bg-white/8 p-5 ring-1 ring-white/10">
             <p className="text-sm text-slate-300">У центрі уваги</p>
             <p className="mt-3 text-xl font-semibold">
-              {featuredMatch
+              {editorialLiveMatch
+                ? editorialLiveMatch.teams
+                : featuredMatch
                 ? `${featuredMatch.homeTeam.name} vs ${featuredMatch.awayTeam.name}`
                 : "Матчі скоро з'являться"}
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              {featuredMatch
+              {editorialLiveMatch
+                ? `${editorialLiveMatch.championshipTitle} • ${editorialLiveMatch.round}`
+                : featuredMatch
                 ? `${featuredMatch.championship.title} • ${featuredMatch.round}`
                 : "Стежте за оновленнями календаря найближчим часом."}
             </p>
             <p className="mt-2 text-sm text-emerald-200">
-              {featuredMatch ? formatDateTime(featuredMatch.date) : ""}
+              {editorialLiveMatch
+                ? editorialLiveMatch.date
+                : featuredMatch
+                ? formatDateTime(featuredMatch.date)
+                : ""}
             </p>
-            {featuredMatch ? (
+            {editorialLiveMatch || featuredMatch ? (
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <span
-                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getMatchStatusClasses(featuredMatch.status)}`}
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                    editorialLiveMatch
+                      ? getMatchStatusClasses("live")
+                      : getMatchStatusClasses(featuredMatch.status)
+                  }`}
                 >
-                  {getMatchStatusLabel(featuredMatch.status)}
+                  {editorialLiveMatch
+                    ? getMatchStatusLabel("live")
+                    : getMatchStatusLabel(featuredMatch.status)}
                 </span>
                 <Link
-                  href={`/matches/${featuredMatch.id}`}
+                  href={
+                    editorialLiveMatch
+                      ? `/championships/${editorialLiveMatch.championshipSlug}`
+                      : `/matches/${featuredMatch.id}`
+                  }
                   className="text-sm font-semibold text-emerald-200 transition-colors hover:text-white"
                 >
-                  До матчу
+                  {editorialLiveMatch ? "До чемпіонату" : "До матчу"}
                 </Link>
               </div>
             ) : null}
