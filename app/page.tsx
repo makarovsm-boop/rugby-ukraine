@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MatchTeamsDisplay } from "@/components/match-teams-display";
+import { TeamBadge } from "@/components/team-badge";
 import {
   extractTags,
   formatDate,
@@ -7,6 +9,7 @@ import {
   getHomePageData,
 } from "@/lib/db";
 import { championships as championshipOverrides } from "@/lib/championship-data";
+import { buildTeamLogoMap, getParsedMatchTeamsWithLogos } from "@/lib/match-teams";
 import {
   getMatchStatusClasses,
   getMatchStatusLabel,
@@ -42,6 +45,10 @@ function getEditorialLiveMatch() {
         round: liveMatch.round,
         teams: liveMatch.teams,
         date: liveMatch.date,
+        parsedTeams: getParsedMatchTeamsWithLogos(
+          liveMatch.teams,
+          buildTeamLogoMap(championship.standings),
+        ),
       };
     }
   }
@@ -102,13 +109,35 @@ export default async function Home() {
         <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
           <div className="rounded-[1.5rem] bg-white/8 p-5 ring-1 ring-white/10">
             <p className="text-sm text-slate-300">У центрі уваги</p>
-            <p className="mt-3 text-xl font-semibold">
-              {editorialLiveMatch
-                ? editorialLiveMatch.teams
-                : featuredMatch
-                ? `${featuredMatch.homeTeam.name} vs ${featuredMatch.awayTeam.name}`
-                : "Матчі скоро з'являться"}
-            </p>
+            {editorialLiveMatch?.parsedTeams ? (
+              <div className="mt-3">
+                <MatchTeamsDisplay
+                  homeName={editorialLiveMatch.parsedTeams.homeName}
+                  awayName={editorialLiveMatch.parsedTeams.awayName}
+                  homeLogo={editorialLiveMatch.parsedTeams.homeLogo}
+                  awayLogo={editorialLiveMatch.parsedTeams.awayLogo}
+                  homeScore={editorialLiveMatch.parsedTeams.homeScore}
+                  awayScore={editorialLiveMatch.parsedTeams.awayScore}
+                  teamNameClassName="text-base font-semibold text-white"
+                  className="sm:flex-col sm:items-start lg:flex-row lg:items-center"
+                />
+              </div>
+            ) : featuredMatch ? (
+              <div className="mt-3">
+                <MatchTeamsDisplay
+                  homeName={featuredMatch.homeTeam.name}
+                  awayName={featuredMatch.awayTeam.name}
+                  homeLogo={featuredMatch.homeTeam.image ?? undefined}
+                  awayLogo={featuredMatch.awayTeam.image ?? undefined}
+                  homeScore={featuredMatch.homeScore}
+                  awayScore={featuredMatch.awayScore}
+                  teamNameClassName="text-base font-semibold text-white"
+                  className="sm:flex-col sm:items-start lg:flex-row lg:items-center"
+                />
+              </div>
+            ) : (
+              <p className="mt-3 text-xl font-semibold">Матчі скоро з'являться</p>
+            )}
             <p className="mt-2 text-sm leading-6 text-slate-300">
               {editorialLiveMatch
                 ? `${editorialLiveMatch.championshipTitle} • ${editorialLiveMatch.round}`
@@ -287,9 +316,17 @@ export default async function Home() {
                     <p className="text-sm text-slate-500">
                       {match.championship.title} • {match.round}
                     </p>
-                    <h3 className="mt-1 text-xl font-semibold text-slate-950">
-                      {match.homeTeam.name} vs {match.awayTeam.name}
-                    </h3>
+                    <div className="mt-2">
+                      <MatchTeamsDisplay
+                        homeName={match.homeTeam.name}
+                        awayName={match.awayTeam.name}
+                        homeLogo={match.homeTeam.image ?? undefined}
+                        awayLogo={match.awayTeam.image ?? undefined}
+                        homeScore={match.homeScore}
+                        awayScore={match.awayScore}
+                        teamNameClassName="text-lg font-semibold text-slate-950"
+                      />
+                    </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span
@@ -349,9 +386,17 @@ export default async function Home() {
                     <p className="text-sm text-slate-500">
                       {result.championship.title} • {result.round}
                     </p>
-                    <h3 className="mt-1 text-lg font-semibold text-slate-950">
-                      {result.homeTeam.name} vs {result.awayTeam.name}
-                    </h3>
+                    <div className="mt-2">
+                      <MatchTeamsDisplay
+                        homeName={result.homeTeam.name}
+                        awayName={result.awayTeam.name}
+                        homeLogo={result.homeTeam.image ?? undefined}
+                        awayLogo={result.awayTeam.image ?? undefined}
+                        homeScore={result.homeScore}
+                        awayScore={result.awayScore}
+                        teamNameClassName="text-base font-semibold text-slate-950"
+                      />
+                    </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <span
@@ -447,12 +492,13 @@ export default async function Home() {
                 className="content-card rounded-[1.5rem] p-6"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
-                    {team.short}
-                  </div>
                   <div>
                     <h3 className="text-lg font-semibold text-slate-950">
-                      {team.name}
+                      <TeamBadge
+                        name={team.name}
+                        logo={team.image ?? undefined}
+                        nameClassName="text-lg font-semibold text-slate-950"
+                      />
                     </h3>
                     <p className="text-sm text-slate-500">
                       {team.country} • {team.level}

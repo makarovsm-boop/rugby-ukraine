@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { MatchTeamsDisplay } from "@/components/match-teams-display";
 import { PageIntro } from "@/components/page-intro";
 import {
   formatDateTime,
@@ -12,6 +13,7 @@ import {
   getChampionshipCanonicalSlug,
   findChampionshipOverrideBySlug,
 } from "@/lib/championship-data";
+import { buildTeamLogoMap, getParsedMatchTeamsWithLogos } from "@/lib/match-teams";
 import { getSafeImagePath } from "@/lib/media";
 import { buildTitle } from "@/lib/seo";
 
@@ -238,13 +240,44 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
 
                 <div className="rounded-[1.25rem] bg-slate-50 p-4 text-sm text-slate-600">
                   <p className="font-semibold text-slate-900">Наступний матч</p>
-                  <p className="mt-2">
-                    {overrideNextMatch
-                      ? overrideNextMatch.teams
-                      : nextMatch
-                      ? `${nextMatch.homeTeam.name} vs ${nextMatch.awayTeam.name}`
-                      : "Матчів поки немає"}
-                  </p>
+                  <div className="mt-2">
+                    {overrideNextMatch && championshipOverride ? (
+                      (() => {
+                        const parsedTeams = getParsedMatchTeamsWithLogos(
+                          overrideNextMatch.teams,
+                          buildTeamLogoMap(championshipOverride.standings),
+                        );
+
+                        return parsedTeams ? (
+                          <MatchTeamsDisplay
+                            homeName={parsedTeams.homeName}
+                            awayName={parsedTeams.awayName}
+                            homeLogo={parsedTeams.homeLogo}
+                            awayLogo={parsedTeams.awayLogo}
+                            homeScore={parsedTeams.homeScore}
+                            awayScore={parsedTeams.awayScore}
+                            teamNameClassName="text-sm font-medium text-slate-700"
+                            size="sm"
+                          />
+                        ) : (
+                          overrideNextMatch.teams
+                        );
+                      })()
+                    ) : nextMatch ? (
+                      <MatchTeamsDisplay
+                        homeName={nextMatch.homeTeam.name}
+                        awayName={nextMatch.awayTeam.name}
+                        homeLogo={nextMatch.homeTeam.image ?? undefined}
+                        awayLogo={nextMatch.awayTeam.image ?? undefined}
+                        homeScore={nextMatch.homeScore}
+                        awayScore={nextMatch.awayScore}
+                        teamNameClassName="text-sm font-medium text-slate-700"
+                        size="sm"
+                      />
+                    ) : (
+                      "Матчів поки немає"
+                    )}
+                  </div>
                   <p className="mt-1 text-slate-500">
                     {overrideNextMatch
                       ? `${overrideNextMatch.round} · ${overrideNextMatch.date}`

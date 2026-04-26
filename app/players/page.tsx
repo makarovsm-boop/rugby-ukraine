@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { TeamBadge } from "@/components/team-badge";
 import { PageIntro } from "@/components/page-intro";
 import { getPlayers } from "@/lib/db";
 import { getSafeImagePath } from "@/lib/media";
@@ -64,9 +65,14 @@ export default async function PlayersPage() {
                   <h2 className="text-2xl font-semibold leading-tight text-slate-950">
                     {player.name}
                   </h2>
-                  <p className="mt-2 text-sm font-medium text-[var(--accent)]">
-                    {player.team.name}
-                  </p>
+                  <div className="mt-2 text-[var(--accent)]">
+                    <TeamBadge
+                      name={player.team.name}
+                      logo={player.team.image ?? undefined}
+                      size="sm"
+                      nameClassName="text-sm font-medium text-[var(--accent)]"
+                    />
+                  </div>
                   <p className="mt-2 text-sm leading-7 text-slate-600">
                     {player.summary}
                   </p>

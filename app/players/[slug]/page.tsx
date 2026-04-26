@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { TeamBadge } from "@/components/team-badge";
 import {
   getPlayerBySlug,
   getPlayers,
@@ -94,7 +95,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
               #{player.number} • {player.position}
             </span>
             <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
-              {player.team.name}
+              <TeamBadge
+                name={player.team.name}
+                logo={player.team.image ?? undefined}
+                size="sm"
+                nameClassName="font-medium text-slate-700"
+              />
             </span>
             <span>{player.team.country}</span>
           </div>
@@ -111,7 +117,15 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                 href={`/teams/${player.team.slug}`}
                 className="inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
               >
-                Перейти до команди {player.team.name}
+                <span className="inline-flex items-center gap-2">
+                  Перейти до команди
+                  <TeamBadge
+                    name={player.team.name}
+                    logo={player.team.image ?? undefined}
+                    size="sm"
+                    nameClassName="font-medium"
+                  />
+                </span>
               </Link>
               <span className="text-sm text-slate-500">
                 {player.team.country} • {player.team.level}
@@ -134,7 +148,13 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
             </div>
             <div>
               <p className="font-semibold text-slate-900">Команда</p>
-              <p className="mt-2">{player.team.name}</p>
+              <div className="mt-2">
+                <TeamBadge
+                  name={player.team.name}
+                  logo={player.team.image ?? undefined}
+                  size="sm"
+                />
+              </div>
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { TeamBadge } from "@/components/team-badge";
 import { PageIntro } from "@/components/page-intro";
 import {
   formatDateTime,
@@ -158,7 +159,11 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
 
                     <div>
                       <h2 className="text-2xl font-semibold leading-tight text-slate-950">
-                        {team.name}
+                        <TeamBadge
+                          name={team.name}
+                          logo={team.image ?? undefined}
+                          nameClassName="text-2xl font-semibold leading-tight text-slate-950"
+                        />
                       </h2>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
                         {team.description}
@@ -188,9 +193,17 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
 
                     <div className="rounded-[1.25rem] bg-slate-50 p-4 text-sm text-slate-600">
                       <p className="font-semibold text-slate-900">Найближчий матч</p>
-                      <p className="mt-2">
-                        {nextMatch ? nextMatch.opponentName : "Матчів поки немає"}
-                      </p>
+                      <div className="mt-2">
+                        {nextMatch ? (
+                          <TeamBadge
+                            name={nextMatch.opponentName}
+                            size="sm"
+                            nameClassName="text-sm"
+                          />
+                        ) : (
+                          "Матчів поки немає"
+                        )}
+                      </div>
                       <p className="mt-1 text-slate-500">
                         {nextMatch ? formatDateTime(nextMatch.date) : ""}
                       </p>

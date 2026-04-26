@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MatchTeamsDisplay } from "@/components/match-teams-display";
+import { TeamBadge } from "@/components/team-badge";
 import {
   formatDateTime,
   getPublicMatchById,
@@ -123,17 +125,29 @@ export default async function MatchPage({ params }: MatchPageProps) {
           </span>
         </div>
 
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-          {match.homeTeam.name} vs {match.awayTeam.name}
-        </h1>
+        <div className="mt-6">
+          <MatchTeamsDisplay
+            homeName={match.homeTeam.name}
+            awayName={match.awayTeam.name}
+            homeLogo={match.homeTeam.image ?? undefined}
+            awayLogo={match.awayTeam.image ?? undefined}
+            homeScore={match.homeScore}
+            awayScore={match.awayScore}
+            teamNameClassName="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl"
+          />
+        </div>
 
         <div className="mt-8 rounded-[1.5rem] bg-slate-50 p-5 sm:p-6">
           <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
             <div className="text-center sm:text-left">
               <p className="text-sm text-slate-500">Домашня команда</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-950">
-                {match.homeTeam.name}
-              </p>
+              <div className="mt-2">
+                <TeamBadge
+                  name={match.homeTeam.name}
+                  logo={match.homeTeam.image ?? undefined}
+                  nameClassName="text-2xl font-semibold text-slate-950"
+                />
+              </div>
             </div>
 
             <div className="rounded-[1rem] bg-white px-5 py-4 text-center shadow-[0_10px_24px_rgba(11,31,58,0.06)]">
@@ -149,9 +163,13 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
             <div className="text-center sm:text-right">
               <p className="text-sm text-slate-500">Гостьова команда</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-950">
-                {match.awayTeam.name}
-              </p>
+              <div className="mt-2 flex justify-center sm:justify-end">
+                <TeamBadge
+                  name={match.awayTeam.name}
+                  logo={match.awayTeam.image ?? undefined}
+                  nameClassName="text-2xl font-semibold text-slate-950"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -196,9 +214,13 @@ export default async function MatchPage({ params }: MatchPageProps) {
             className="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition-colors hover:border-[var(--accent)]/35"
           >
             <p className="text-sm text-slate-500">Домашня команда</p>
-            <p className="mt-2 text-xl font-semibold text-slate-950">
-              {match.homeTeam.name}
-            </p>
+            <div className="mt-2">
+              <TeamBadge
+                name={match.homeTeam.name}
+                logo={match.homeTeam.image ?? undefined}
+                nameClassName="text-xl font-semibold text-slate-950"
+              />
+            </div>
           </Link>
 
           <Link
@@ -206,9 +228,13 @@ export default async function MatchPage({ params }: MatchPageProps) {
             className="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition-colors hover:border-[var(--accent)]/35"
           >
             <p className="text-sm text-slate-500">Гостьова команда</p>
-            <p className="mt-2 text-xl font-semibold text-slate-950">
-              {match.awayTeam.name}
-            </p>
+            <div className="mt-2">
+              <TeamBadge
+                name={match.awayTeam.name}
+                logo={match.awayTeam.image ?? undefined}
+                nameClassName="text-xl font-semibold text-slate-950"
+              />
+            </div>
           </Link>
         </div>
       </article>

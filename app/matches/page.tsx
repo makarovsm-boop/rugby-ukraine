@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MatchTeamsDisplay } from "@/components/match-teams-display";
 import { PageIntro } from "@/components/page-intro";
 import { formatDateTime, getPublicMatches } from "@/lib/db";
 import { championships as championshipOverrides } from "@/lib/championship-data";
+import { buildTeamLogoMap, getParsedMatchTeamsWithLogos } from "@/lib/match-teams";
 import {
   getMatchStatusClasses,
   getMatchStatusLabel,
@@ -56,6 +58,7 @@ type EditorialMatchCard = {
   championshipSlug: string;
   round: string;
   teams: string;
+  parsedTeams: ReturnType<typeof getParsedMatchTeamsWithLogos>;
   venueText: string;
   kickoffText: string;
   parsedDate: Date | null;
@@ -88,6 +91,10 @@ function getEditorialMatchCards() {
       .filter((match) => !match.round.toLowerCase().includes("статус сезону"))
       .map((match) => {
         const parsedDate = parseEditorialMatchDate(match.round, match.date);
+        const parsedTeams = getParsedMatchTeamsWithLogos(
+          match.teams,
+          buildTeamLogoMap(championship.standings),
+        );
         const lowerRound = match.round.toLowerCase();
         const status = lowerRound.includes("наживо")
           ? "live"
@@ -101,6 +108,7 @@ function getEditorialMatchCards() {
           championshipSlug: championship.slug,
           round: match.round,
           teams: match.teams,
+          parsedTeams,
           venueText: match.location,
           kickoffText: match.date,
           parsedDate,
@@ -229,9 +237,23 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
                       <p className="text-sm text-slate-500">
                         {match.championshipTitle} • {match.round}
                       </p>
-                      <h3 className="mt-1 text-xl font-semibold leading-tight text-slate-950">
-                        {match.teams}
-                      </h3>
+                      {match.parsedTeams ? (
+                        <div className="mt-2">
+                          <MatchTeamsDisplay
+                            homeName={match.parsedTeams.homeName}
+                            awayName={match.parsedTeams.awayName}
+                            homeLogo={match.parsedTeams.homeLogo}
+                            awayLogo={match.parsedTeams.awayLogo}
+                            homeScore={match.parsedTeams.homeScore}
+                            awayScore={match.parsedTeams.awayScore}
+                            teamNameClassName="text-lg font-semibold text-slate-950"
+                          />
+                        </div>
+                      ) : (
+                        <h3 className="mt-1 text-xl font-semibold leading-tight text-slate-950">
+                          {match.teams}
+                        </h3>
+                      )}
                     </div>
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
@@ -281,9 +303,17 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
                       <p className="text-sm text-slate-500">
                         {match.championship.title} • {match.round}
                       </p>
-                      <h3 className="mt-1 text-xl font-semibold leading-tight text-slate-950">
-                        {match.homeTeam.name} vs {match.awayTeam.name}
-                      </h3>
+                      <div className="mt-2">
+                        <MatchTeamsDisplay
+                          homeName={match.homeTeam.name}
+                          awayName={match.awayTeam.name}
+                          homeLogo={match.homeTeam.image ?? undefined}
+                          awayLogo={match.awayTeam.image ?? undefined}
+                          homeScore={match.homeScore}
+                          awayScore={match.awayScore}
+                          teamNameClassName="text-lg font-semibold text-slate-950"
+                        />
+                      </div>
                     </div>
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getMatchStatusClasses(match.status)}`}
@@ -354,9 +384,23 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
                       <p className="text-sm text-slate-500">
                         {match.championshipTitle} • {match.round}
                       </p>
-                      <h3 className="mt-1 text-xl font-semibold leading-tight text-slate-950">
-                        {match.teams}
-                      </h3>
+                      {match.parsedTeams ? (
+                        <div className="mt-2">
+                          <MatchTeamsDisplay
+                            homeName={match.parsedTeams.homeName}
+                            awayName={match.parsedTeams.awayName}
+                            homeLogo={match.parsedTeams.homeLogo}
+                            awayLogo={match.parsedTeams.awayLogo}
+                            homeScore={match.parsedTeams.homeScore}
+                            awayScore={match.parsedTeams.awayScore}
+                            teamNameClassName="text-lg font-semibold text-slate-950"
+                          />
+                        </div>
+                      ) : (
+                        <h3 className="mt-1 text-xl font-semibold leading-tight text-slate-950">
+                          {match.teams}
+                        </h3>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 self-start sm:self-auto">
                       <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-700">
@@ -391,9 +435,17 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
                       <p className="text-sm text-slate-500">
                         {match.championship.title} • {match.round}
                       </p>
-                      <h3 className="mt-1 text-xl font-semibold leading-tight text-slate-950">
-                        {match.homeTeam.name} vs {match.awayTeam.name}
-                      </h3>
+                      <div className="mt-2">
+                        <MatchTeamsDisplay
+                          homeName={match.homeTeam.name}
+                          awayName={match.awayTeam.name}
+                          homeLogo={match.homeTeam.image ?? undefined}
+                          awayLogo={match.awayTeam.image ?? undefined}
+                          homeScore={match.homeScore}
+                          awayScore={match.awayScore}
+                          teamNameClassName="text-lg font-semibold text-slate-950"
+                        />
+                      </div>
                     </div>
                     <div className="flex items-center gap-3 self-start sm:self-auto">
                       <span

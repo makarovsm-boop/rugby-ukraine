@@ -8,6 +8,7 @@ import {
   getTeams,
 } from "@/lib/db";
 import { FallbackState } from "@/components/fallback-state";
+import { MatchTeamsDisplay } from "@/components/match-teams-display";
 import {
   getMatchStatusClasses,
   getMatchStatusLabel,
@@ -268,9 +269,15 @@ export default async function TeamPage({ params }: TeamPageProps) {
                   >
                     {getMatchStatusLabel(match.status)}
                   </span>
-                  <h3 className="mt-2 text-xl font-semibold text-slate-950">
-                    {match.homeTeamName} vs {match.awayTeamName}
-                  </h3>
+                  <div className="mt-3">
+                    <MatchTeamsDisplay
+                      homeName={match.homeTeamName}
+                      awayName={match.awayTeamName}
+                      homeScore={match.homeScore}
+                      awayScore={match.awayScore}
+                      teamNameClassName="text-lg font-semibold text-slate-950"
+                    />
+                  </div>
                   <p className="mt-3 text-sm text-slate-600">
                     {formatDateTime(match.date)}
                   </p>
