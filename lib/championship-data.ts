@@ -40,27 +40,27 @@ export function findChampionshipOverride(input: {
   const slugKey = input.slug ? normalizeChampionshipKey(input.slug) : null;
   const titleKey = input.title ? normalizeChampionshipKey(input.title) : null;
 
-  if (titleKey) {
-    const byTitle = championships.find((entry) => {
-      const titleKeys = [entry.title, ...(entry.aliases ?? [])].map(
-        normalizeChampionshipKey,
-      );
-
-      return titleKeys.includes(titleKey);
-    });
-
-    if (byTitle) {
-      return byTitle;
-    }
-  }
-
   if (slugKey) {
-    return championships.find((entry) => {
+    const bySlug = championships.find((entry) => {
       const slugKeys = [entry.slug, ...(entry.aliases ?? [])].map(
         normalizeChampionshipKey,
       );
 
       return slugKeys.includes(slugKey);
+    });
+
+    if (bySlug) {
+      return bySlug;
+    }
+  }
+
+  if (titleKey) {
+    return championships.find((entry) => {
+      const titleKeys = [entry.title, ...(entry.aliases ?? [])].map(
+        normalizeChampionshipKey,
+      );
+
+      return titleKeys.includes(titleKey);
     });
   }
 
@@ -71,8 +71,23 @@ export function getChampionshipPreviewSlug(input: {
   slug?: string;
   title?: string;
 }) {
-  const override = findChampionshipOverride(input);
-  return override?.slug ?? input.slug ?? "";
+  const titleKey = input.title ? normalizeChampionshipKey(input.title) : null;
+
+  if (titleKey) {
+    const byTitle = championships.find((entry) => {
+      const titleKeys = [entry.title, ...(entry.aliases ?? [])].map(
+        normalizeChampionshipKey,
+      );
+
+      return titleKeys.includes(titleKey);
+    });
+
+    if (byTitle) {
+      return byTitle.slug;
+    }
+  }
+
+  return findChampionshipOverride(input)?.slug ?? input.slug ?? "";
 }
 
 export const championships: Championship[] = [

@@ -60,11 +60,10 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
   const mergedChampionships = [
     ...dbChampionships,
     ...championshipOverrides
+      .filter((override) => override.slug !== "champions-cup")
       .filter((override) =>
         !dbChampionships.some(
-          (championship) =>
-            championship.slug === override.slug ||
-            championship.title === override.title,
+          (championship) => championship.slug === override.slug,
         ),
       )
       .filter((override) => (region ? override.region === region : true))
@@ -83,7 +82,7 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
   const uniqueChampionships = new Map<string, (typeof mergedChampionships)[number]>();
 
   for (const championship of mergedChampionships) {
-    const key = normalizeKey(championship.title);
+    const key = championship.slug;
 
     if (!uniqueChampionships.has(key)) {
       uniqueChampionships.set(key, championship);
@@ -91,14 +90,22 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
   }
 
   const championships = [...uniqueChampionships.values()].sort((a, b) => {
-    const aPriority = championshipPriority[normalizeKey(a.title)] ?? 99;
-    const bPriority = championshipPriority[normalizeKey(b.title)] ?? 99;
+    const aDisplayTitle = findChampionshipOverride({
+      slug: a.slug,
+      title: a.title,
+    })?.title ?? a.title;
+    const bDisplayTitle = findChampionshipOverride({
+      slug: b.slug,
+      title: b.title,
+    })?.title ?? b.title;
+    const aPriority = championshipPriority[normalizeKey(aDisplayTitle)] ?? 99;
+    const bPriority = championshipPriority[normalizeKey(bDisplayTitle)] ?? 99;
 
     if (aPriority !== bPriority) {
       return aPriority - bPriority;
     }
 
-    return a.title.localeCompare(b.title, "uk");
+    return aDisplayTitle.localeCompare(bDisplayTitle, "uk");
   });
   const regions = [...new Set([...dbRegions, ...championshipOverrides.map((item) => item.region)])]
     .sort((a, b) => a.localeCompare(b, "uk"));
