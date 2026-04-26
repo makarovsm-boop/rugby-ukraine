@@ -3,7 +3,10 @@ import Link from "next/link";
 import { MatchTeamsDisplay } from "@/components/match-teams-display";
 import { PageIntro } from "@/components/page-intro";
 import { formatDateTime, getPublicMatches } from "@/lib/db";
-import { championships as championshipOverrides } from "@/lib/championship-data";
+import {
+  championships as championshipOverrides,
+  getChampionshipCanonicalSlug,
+} from "@/lib/championship-data";
 import { buildTeamLogoMap, getParsedMatchTeamsWithLogos } from "@/lib/match-teams";
 import {
   getMatchStatusClasses,
@@ -86,7 +89,7 @@ function parseEditorialMatchDate(round: string, date: string) {
 }
 
 function getEditorialMatchCards() {
-  return championshipOverrides.flatMap((championship) =>
+  const rawCards = championshipOverrides.flatMap((championship) =>
     championship.matches
       .filter((match) => !match.round.toLowerCase().includes("статус сезону"))
       .map((match) => {
@@ -103,9 +106,12 @@ function getEditorialMatchCards() {
             : "finished";
 
         return {
-          id: `${championship.slug}-${match.round}-${match.teams}`,
+          id: `${getChampionshipCanonicalSlug({ slug: championship.slug, title: championship.title })}-${match.round}-${match.teams}`,
           championshipTitle: championship.title,
-          championshipSlug: championship.slug,
+          championshipSlug: getChampionshipCanonicalSlug({
+            slug: championship.slug,
+            title: championship.title,
+          }),
           round: match.round,
           teams: match.teams,
           parsedTeams,
@@ -116,6 +122,24 @@ function getEditorialMatchCards() {
         } satisfies EditorialMatchCard;
       }),
   );
+
+  const uniqueCards = new Map<string, EditorialMatchCard>();
+
+  for (const card of rawCards) {
+    const dedupeKey = [
+      card.championshipSlug,
+      card.round,
+      card.teams,
+      card.kickoffText,
+      card.venueText,
+    ].join("::");
+
+    if (!uniqueCards.has(dedupeKey)) {
+      uniqueCards.set(dedupeKey, card);
+    }
+  }
+
+  return [...uniqueCards.values()];
 }
 
 export async function generateMetadata({
