@@ -7,7 +7,11 @@ import {
   getChampionshipRegions,
   getChampionshipsByRegion,
 } from "@/lib/db";
-import { championships as championshipOverrides, findChampionshipOverride } from "@/lib/championship-data";
+import {
+  championships as championshipOverrides,
+  findChampionshipOverride,
+  findChampionshipOverrideBySlug,
+} from "@/lib/championship-data";
 import { getSafeImagePath } from "@/lib/media";
 import { buildTitle } from "@/lib/seo";
 
@@ -29,8 +33,8 @@ function buildChampionshipsHref(region?: string) {
   return region ? `/championships?region=${encodeURIComponent(region)}` : "/championships";
 }
 
-function getOverrideNextMatch(slug: string, title: string) {
-  const championshipOverride = findChampionshipOverride({ slug, title });
+function getOverrideNextMatch(slug: string) {
+  const championshipOverride = findChampionshipOverrideBySlug(slug);
   return championshipOverride?.matches.find((match) => match.teams.includes(" vs "));
 }
 
@@ -90,14 +94,8 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
   }
 
   const championships = [...uniqueChampionships.values()].sort((a, b) => {
-    const aDisplayTitle = findChampionshipOverride({
-      slug: a.slug,
-      title: a.title,
-    })?.title ?? a.title;
-    const bDisplayTitle = findChampionshipOverride({
-      slug: b.slug,
-      title: b.title,
-    })?.title ?? b.title;
+    const aDisplayTitle = findChampionshipOverrideBySlug(a.slug)?.title ?? a.title;
+    const bDisplayTitle = findChampionshipOverrideBySlug(b.slug)?.title ?? b.title;
     const aPriority = championshipPriority[normalizeKey(aDisplayTitle)] ?? 99;
     const bPriority = championshipPriority[normalizeKey(bDisplayTitle)] ?? 99;
 
@@ -157,10 +155,9 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
       {championships.length > 0 ? (
         <section className="grid gap-6 lg:grid-cols-3">
           {await Promise.all(championships.map(async (championship, index) => {
-            const championshipOverride = findChampionshipOverride({
-              slug: championship.slug,
-              title: championship.title,
-            });
+            const championshipOverride = findChampionshipOverrideBySlug(
+              championship.slug,
+            );
             const displayChampionship = championshipOverride
               ? {
                   ...championship,
@@ -179,7 +176,6 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
             const nextMatch = championship.matches[0];
             const overrideNextMatch = getOverrideNextMatch(
               championship.slug,
-              championship.title,
             );
             const matchesCount =
               championshipOverride?.matches.length && championshipOverride.matches.length > 0

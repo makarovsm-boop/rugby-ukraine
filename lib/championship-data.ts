@@ -90,6 +90,14 @@ export function getChampionshipPreviewSlug(input: {
   return findChampionshipOverride(input)?.slug ?? input.slug ?? "";
 }
 
+export function findChampionshipOverrideBySlug(slug?: string) {
+  if (!slug) {
+    return undefined;
+  }
+
+  return findChampionshipOverride({ slug });
+}
+
 export const championships: Championship[] = [
   {
     slug: "european-championship",
