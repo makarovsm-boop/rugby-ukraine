@@ -51,6 +51,8 @@ const championshipPriority: Record<string, number> = {
   "чемпіонат європи": 5,
 };
 
+const hiddenRegions = new Set(["Світ", "Міжнародний", "Міжнародні"]);
+
 function normalizeKey(value: string) {
   return value
     .normalize("NFD")
@@ -66,8 +68,11 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
     getChampionshipsByRegion(region),
     getChampionshipRegions(),
   ]);
+  const filteredDbChampionships = dbChampionships.filter(
+    (championship) => !hiddenRegions.has(championship.region),
+  );
   const mergedChampionships = [
-    ...dbChampionships.map((championship) => ({
+    ...filteredDbChampionships.map((championship) => ({
       ...championship,
       slug: getChampionshipCanonicalSlug({
         slug: championship.slug,
@@ -86,6 +91,7 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
             championship.title === override.title,
         ),
       )
+      .filter((override) => !hiddenRegions.has(override.region))
       .filter((override) => (region ? override.region === region : true))
       .map((override) => ({
         id: override.slug,
@@ -122,6 +128,7 @@ export default async function ChampionshipsPage({ searchParams }: ChampionshipsP
     return aDisplayTitle.localeCompare(bDisplayTitle, "uk");
   });
   const regions = [...new Set([...dbRegions, ...championshipOverrides.map((item) => item.region)])]
+    .filter((item) => !hiddenRegions.has(item))
     .sort((a, b) => a.localeCompare(b, "uk"));
 
   return (
