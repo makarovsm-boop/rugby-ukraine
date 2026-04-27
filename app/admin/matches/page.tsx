@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { createMatch, deleteMatch } from "@/app/admin/matches/actions";
+import {
+  createMatch,
+  deleteMatch,
+  importEditorialMatch,
+} from "@/app/admin/matches/actions";
 import { AdminPageHeader } from "@/components/admin-page-header";
 import {
   AdminFormField,
@@ -20,6 +24,10 @@ import {
   getChampionshipsForAdminSelect,
   getTeamsForAdminSelect,
 } from "@/lib/db";
+import {
+  buildEditorialMatchSignature,
+  getEditorialMatchCards,
+} from "@/lib/editorial-matches";
 import {
   getMatchStatusClasses,
   getMatchStatusLabel,
@@ -50,6 +58,31 @@ export default async function AdminMatchesPage({
     getChampionshipsForAdminSelect(),
     getTeamsForAdminSelect(),
   ]);
+  const editorialMatches = getEditorialMatchCards();
+  const existingMatchSignatures = new Set(
+    matches.map((match) =>
+      buildEditorialMatchSignature({
+        championshipSlug: match.championship.slug,
+        round: match.round,
+        homeName: match.homeTeam.name,
+        awayName: match.awayTeam.name,
+      }),
+    ),
+  );
+  const importableEditorialMatches = editorialMatches.filter((match) => {
+    if (!match.parsedTeams) {
+      return false;
+    }
+
+    return !existingMatchSignatures.has(
+      buildEditorialMatchSignature({
+        championshipSlug: match.championshipSlug,
+        round: match.round,
+        homeName: match.parsedTeams.homeName,
+        awayName: match.parsedTeams.awayName,
+      }),
+    );
+  });
   const errorMessage = getFormErrorMessage(error);
   const successMessage = getFormSuccessMessage(success);
 
@@ -193,6 +226,76 @@ export default async function AdminMatchesPage({
             </div>
           </article>
         ))}
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-slate-950">
+            Опубліковані редакційні матчі
+          </h2>
+          <p className="mt-2 text-sm leading-7 text-slate-600">
+            Це матчі, які вже показуються у публічному розділі `Матчі` через
+            редакційні дані чемпіонатів. Додайте їх в адмінку, щоб коригувати
+            статус, час, рахунок або видаляти як звичайні записи.
+          </p>
+        </div>
+
+        {importableEditorialMatches.length > 0 ? (
+          importableEditorialMatches.map((match) => (
+            <article
+              key={match.id}
+              className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(11,31,58,0.05)]"
+            >
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                    <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
+                      {match.championshipTitle}
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span>{match.round}</span>
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        match.status === "live"
+                          ? "bg-rose-50 text-rose-700"
+                          : match.status === "upcoming"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      {match.status === "live"
+                        ? "Наживо"
+                        : match.status === "upcoming"
+                          ? "Скоро"
+                          : "Завершено"}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-950">
+                    {match.parsedTeams
+                      ? `${match.parsedTeams.homeName} vs ${match.parsedTeams.awayName}`
+                      : match.teams}
+                  </h3>
+                  <p className="text-sm leading-7 text-slate-600">
+                    {match.kickoffText}
+                  </p>
+                  <p className="text-sm leading-7 text-slate-600">
+                    {match.venueText}
+                  </p>
+                </div>
+
+                <form action={importEditorialMatch.bind(null, match.id)}>
+                  <button type="submit" className={adminPrimaryButtonClass}>
+                    Додати в адмінку
+                  </button>
+                </form>
+              </div>
+            </article>
+          ))
+        ) : (
+          <section className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white px-6 py-10 text-center text-slate-600">
+            Усі редакційні матчі вже додані в адмінку або їх поки немає.
+          </section>
+        )}
       </section>
     </div>
   );

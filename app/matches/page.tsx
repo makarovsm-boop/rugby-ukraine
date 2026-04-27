@@ -4,10 +4,9 @@ import { MatchTeamsDisplay } from "@/components/match-teams-display";
 import { PageIntro } from "@/components/page-intro";
 import { formatDateTime, getPublicMatches } from "@/lib/db";
 import {
-  championships as championshipOverrides,
-  getChampionshipCanonicalSlug,
-} from "@/lib/championship-data";
-import { buildTeamLogoMap, getParsedMatchTeamsWithLogos } from "@/lib/match-teams";
+  buildEditorialMatchSignature,
+  getEditorialMatchCards,
+} from "@/lib/editorial-matches";
 import {
   getMatchStatusClasses,
   getMatchStatusLabel,
@@ -38,108 +37,6 @@ function normalizeMatchFilter(value?: string) {
 
 function buildMatchesHref(status: string) {
   return status === "all" ? "/matches" : `/matches?status=${status}`;
-}
-
-const ukrainianMonthIndex: Record<string, number> = {
-  січня: 0,
-  лютого: 1,
-  березня: 2,
-  квітня: 3,
-  травня: 4,
-  червня: 5,
-  липня: 6,
-  серпня: 7,
-  вересня: 8,
-  жовтня: 9,
-  листопада: 10,
-  грудня: 11,
-};
-
-type EditorialMatchCard = {
-  id: string;
-  championshipTitle: string;
-  championshipSlug: string;
-  round: string;
-  teams: string;
-  parsedTeams: ReturnType<typeof getParsedMatchTeamsWithLogos>;
-  venueText: string;
-  kickoffText: string;
-  parsedDate: Date | null;
-  status: "upcoming" | "live" | "finished";
-};
-
-function parseEditorialMatchDate(round: string, date: string) {
-  const sourceText = `${round} ${date}`;
-  const match = sourceText.match(
-    /(\d{1,2})\s+(січня|лютого|березня|квітня|травня|червня|липня|серпня|вересня|жовтня|листопада|грудня)\s+(\d{4})/i,
-  );
-
-  if (!match) {
-    return null;
-  }
-
-  const day = Number(match[1]);
-  const month = ukrainianMonthIndex[match[2].toLowerCase()];
-  const year = Number(match[3]);
-  const timeMatch = sourceText.match(/(\d{1,2}):(\d{2})/);
-  const hours = timeMatch ? Number(timeMatch[1]) : 12;
-  const minutes = timeMatch ? Number(timeMatch[2]) : 0;
-
-  return new Date(year, month, day, hours, minutes);
-}
-
-function getEditorialMatchCards() {
-  const rawCards = championshipOverrides.flatMap((championship) =>
-    championship.matches
-      .filter((match) => !match.round.toLowerCase().includes("статус сезону"))
-      .map((match) => {
-        const parsedDate = parseEditorialMatchDate(match.round, match.date);
-        const parsedTeams = getParsedMatchTeamsWithLogos(
-          match.teams,
-          buildTeamLogoMap(championship.standings),
-        );
-        const lowerRound = match.round.toLowerCase();
-        const status = lowerRound.includes("наживо")
-          ? "live"
-          : lowerRound.includes("анонс") || lowerRound.includes("півфінал")
-            ? "upcoming"
-            : "finished";
-
-        return {
-          id: `${getChampionshipCanonicalSlug({ slug: championship.slug, title: championship.title })}-${match.round}-${match.teams}`,
-          championshipTitle: championship.title,
-          championshipSlug: getChampionshipCanonicalSlug({
-            slug: championship.slug,
-            title: championship.title,
-          }),
-          round: match.round,
-          teams: match.teams,
-          parsedTeams,
-          venueText: match.location,
-          kickoffText: match.date,
-          parsedDate,
-          status,
-        } satisfies EditorialMatchCard;
-      }),
-  );
-
-  const uniqueCards = new Map<string, EditorialMatchCard>();
-
-  for (const card of rawCards) {
-    const dedupeKey = [
-      card.championshipSlug,
-      card.round,
-      card.teams,
-      card.kickoffText,
-      card.venueText,
-    ].join("::");
-
-    if (!uniqueCards.has(dedupeKey)) {
-      uniqueCards.set(dedupeKey, card);
-    }
-  }
-
-  return [...uniqueCards.values()];
 }
 
 export async function generateMetadata({
@@ -179,7 +76,7 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
   twoWeeksAhead.setDate(twoWeeksAhead.getDate() + 14);
 
   const editorialMatches = getEditorialMatchCards();
-  const editorialSchedule = editorialMatches
+  const editorialScheduleBase = editorialMatches
     .filter(
       (match) =>
         (match.status === "upcoming" || match.status === "live") &&
@@ -192,13 +89,92 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
         (a.parsedDate?.getTime() ?? Number.MAX_SAFE_INTEGER) -
         (b.parsedDate?.getTime() ?? Number.MAX_SAFE_INTEGER),
     );
-  const editorialResults = editorialMatches
+  const editorialResultsBase = editorialMatches
     .filter((match) => match.status === "finished")
     .sort(
       (a, b) =>
         (b.parsedDate?.getTime() ?? 0) - (a.parsedDate?.getTime() ?? 0),
     )
     .slice(0, 8);
+
+  const databaseScheduleSignatures = new Set(
+    schedule.map((match) =>
+      buildEditorialMatchSignature({
+        championshipSlug: match.championship.slug,
+        round: match.round,
+        homeName: match.homeTeam.name,
+        awayName: match.awayTeam.name,
+      }),
+    ),
+  );
+  const databaseResultSignatures = new Set(
+    results.map((match) =>
+      buildEditorialMatchSignature({
+        championshipSlug: match.championship.slug,
+        round: match.round,
+        homeName: match.homeTeam.name,
+        awayName: match.awayTeam.name,
+      }),
+    ),
+  );
+
+  const editorialSchedule = editorialScheduleBase
+    .filter((match) =>
+      normalizedStatus === "live"
+        ? match.status === "live"
+        : normalizedStatus === "upcoming"
+          ? match.status === "upcoming"
+          : true,
+    )
+    .filter((match) => {
+      if (!match.parsedTeams) {
+        return true;
+      }
+
+      return !databaseScheduleSignatures.has(
+        buildEditorialMatchSignature({
+          championshipSlug: match.championshipSlug,
+          round: match.round,
+          homeName: match.parsedTeams.homeName,
+          awayName: match.parsedTeams.awayName,
+        }),
+      );
+    });
+
+  const editorialResults = editorialResultsBase.filter((match) => {
+    if (!match.parsedTeams) {
+      return true;
+    }
+
+    return !databaseResultSignatures.has(
+      buildEditorialMatchSignature({
+        championshipSlug: match.championshipSlug,
+        round: match.round,
+        homeName: match.parsedTeams.homeName,
+        awayName: match.parsedTeams.awayName,
+      }),
+    );
+  });
+
+  const combinedSchedule = [
+    ...editorialSchedule,
+    ...schedule,
+  ].sort((a, b) => {
+    const aTime =
+      "parsedDate" in a ? (a.parsedDate?.getTime() ?? Number.MAX_SAFE_INTEGER) : a.date.getTime();
+    const bTime =
+      "parsedDate" in b ? (b.parsedDate?.getTime() ?? Number.MAX_SAFE_INTEGER) : b.date.getTime();
+    return aTime - bTime;
+  });
+
+  const combinedResults = [
+    ...editorialResults,
+    ...results,
+  ].sort((a, b) => {
+    const aTime = "parsedDate" in a ? (a.parsedDate?.getTime() ?? 0) : a.date.getTime();
+    const bTime = "parsedDate" in b ? (b.parsedDate?.getTime() ?? 0) : b.date.getTime();
+    return bTime - aTime;
+  });
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
@@ -249,75 +225,72 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
             </h2>
           </div>
 
-          {editorialSchedule.length > 0 ? (
+          {combinedSchedule.length > 0 ? (
             <div className="space-y-4">
-              {editorialSchedule.map((match) => (
-                <article
-                  key={match.id}
-                  className="content-card rounded-[1.5rem] p-5"
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm text-slate-500">
-                        {match.championshipTitle} • {match.round}
-                      </p>
-                      {match.parsedTeams ? (
-                        <div className="mt-2">
-                          <MatchTeamsDisplay
-                            homeName={match.parsedTeams.homeName}
-                            awayName={match.parsedTeams.awayName}
-                            homeLogo={match.parsedTeams.homeLogo}
-                            awayLogo={match.parsedTeams.awayLogo}
-                            homeScore={match.parsedTeams.homeScore}
-                            awayScore={match.parsedTeams.awayScore}
-                            teamNameClassName="text-lg font-semibold text-slate-950"
-                          />
-                        </div>
-                      ) : (
-                        <h3 className="mt-1 text-xl font-semibold leading-tight text-slate-950">
-                          {match.teams}
-                        </h3>
-                      )}
-                    </div>
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                        match.status === "live"
-                          ? "bg-rose-50 text-rose-700"
-                          : "bg-emerald-50 text-emerald-700"
-                      }`}
-                    >
-                      {match.status === "live" ? "Наживо" : "Скоро"}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-                    <div className="flex flex-col gap-1 text-sm text-slate-600">
-                      <p>{match.kickoffText}</p>
-                      <p>{match.venueText}</p>
-                    </div>
-
-                    <div className="rounded-[1rem] bg-slate-50 px-4 py-3 text-center">
-                      <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
-                        Турнір
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-950">
-                        {match.championshipTitle}
-                      </p>
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/championships/${match.championshipSlug}`}
-                    className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]"
+              {combinedSchedule.map((match) =>
+                "parsedDate" in match ? (
+                  <article
+                    key={match.id}
+                    className="content-card rounded-[1.5rem] p-5"
                   >
-                    До сторінки чемпіонату
-                  </Link>
-                </article>
-              ))}
-            </div>
-          ) : schedule.length > 0 ? (
-            <div className="space-y-4">
-              {schedule.map((match) => (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm text-slate-500">
+                          {match.championshipTitle} • {match.round}
+                        </p>
+                        {match.parsedTeams ? (
+                          <div className="mt-2">
+                            <MatchTeamsDisplay
+                              homeName={match.parsedTeams.homeName}
+                              awayName={match.parsedTeams.awayName}
+                              homeLogo={match.parsedTeams.homeLogo}
+                              awayLogo={match.parsedTeams.awayLogo}
+                              homeScore={match.parsedTeams.homeScore}
+                              awayScore={match.parsedTeams.awayScore}
+                              teamNameClassName="text-lg font-semibold text-slate-950"
+                            />
+                          </div>
+                        ) : (
+                          <h3 className="mt-1 text-xl font-semibold leading-tight text-slate-950">
+                            {match.teams}
+                          </h3>
+                        )}
+                      </div>
+                      <span
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                          match.status === "live"
+                            ? "bg-rose-50 text-rose-700"
+                            : "bg-emerald-50 text-emerald-700"
+                        }`}
+                      >
+                        {match.status === "live" ? "Наживо" : "Скоро"}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+                      <div className="flex flex-col gap-1 text-sm text-slate-600">
+                        <p>{match.kickoffText}</p>
+                        <p>{match.venueText}</p>
+                      </div>
+
+                      <div className="rounded-[1rem] bg-slate-50 px-4 py-3 text-center">
+                        <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
+                          Турнір
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">
+                          {match.championshipTitle}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Link
+                      href={`/championships/${match.championshipSlug}`}
+                      className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]"
+                    >
+                      До сторінки чемпіонату
+                    </Link>
+                  </article>
+                ) : (
                 <article
                   key={match.id}
                   className="content-card rounded-[1.5rem] p-5"
@@ -375,7 +348,8 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
                     Детальніше про матч
                   </Link>
                 </article>
-              ))}
+                ),
+              )}
             </div>
           ) : (
             <section className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white px-6 py-10 text-center text-slate-600">
@@ -396,60 +370,57 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
             </h2>
           </div>
 
-          {editorialResults.length > 0 ? (
+          {combinedResults.length > 0 ? (
             <div className="space-y-4">
-              {editorialResults.map((match) => (
-                <article
-                  key={match.id}
-                  className="content-card rounded-[1.5rem] p-5"
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm text-slate-500">
-                        {match.championshipTitle} • {match.round}
-                      </p>
-                      {match.parsedTeams ? (
-                        <div className="mt-2">
-                          <MatchTeamsDisplay
-                            homeName={match.parsedTeams.homeName}
-                            awayName={match.parsedTeams.awayName}
-                            homeLogo={match.parsedTeams.homeLogo}
-                            awayLogo={match.parsedTeams.awayLogo}
-                            homeScore={match.parsedTeams.homeScore}
-                            awayScore={match.parsedTeams.awayScore}
-                            teamNameClassName="text-lg font-semibold text-slate-950"
-                          />
-                        </div>
-                      ) : (
-                        <h3 className="mt-1 text-xl font-semibold leading-tight text-slate-950">
-                          {match.teams}
-                        </h3>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 self-start sm:self-auto">
-                      <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-700">
-                        Результат
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-col gap-1 text-sm text-slate-600">
-                    <p>{match.kickoffText}</p>
-                    <p>{match.venueText}</p>
-                  </div>
-
-                  <Link
-                    href={`/championships/${match.championshipSlug}`}
-                    className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]"
+              {combinedResults.map((match) =>
+                "parsedDate" in match ? (
+                  <article
+                    key={match.id}
+                    className="content-card rounded-[1.5rem] p-5"
                   >
-                    До сторінки чемпіонату
-                  </Link>
-                </article>
-              ))}
-            </div>
-          ) : results.length > 0 ? (
-            <div className="space-y-4">
-              {results.map((match) => (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm text-slate-500">
+                          {match.championshipTitle} • {match.round}
+                        </p>
+                        {match.parsedTeams ? (
+                          <div className="mt-2">
+                            <MatchTeamsDisplay
+                              homeName={match.parsedTeams.homeName}
+                              awayName={match.parsedTeams.awayName}
+                              homeLogo={match.parsedTeams.homeLogo}
+                              awayLogo={match.parsedTeams.awayLogo}
+                              homeScore={match.parsedTeams.homeScore}
+                              awayScore={match.parsedTeams.awayScore}
+                              teamNameClassName="text-lg font-semibold text-slate-950"
+                            />
+                          </div>
+                        ) : (
+                          <h3 className="mt-1 text-xl font-semibold leading-tight text-slate-950">
+                            {match.teams}
+                          </h3>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 self-start sm:self-auto">
+                        <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-700">
+                          Результат
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-col gap-1 text-sm text-slate-600">
+                      <p>{match.kickoffText}</p>
+                      <p>{match.venueText}</p>
+                    </div>
+
+                    <Link
+                      href={`/championships/${match.championshipSlug}`}
+                      className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]"
+                    >
+                      До сторінки чемпіонату
+                    </Link>
+                  </article>
+                ) : (
                 <article
                   key={match.id}
                   className="content-card rounded-[1.5rem] p-5"
@@ -495,7 +466,8 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
                     Детальніше про матч
                   </Link>
                 </article>
-              ))}
+                ),
+              )}
             </div>
           ) : (
             <section className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white px-6 py-10 text-center text-slate-600">

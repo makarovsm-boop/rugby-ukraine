@@ -7,7 +7,13 @@ import {
   redirectWithFormSuccess,
 } from "@/lib/admin-form-errors";
 import { createMatchId, requireAdmin } from "@/lib/admin";
+import {
+  buildEditorialMatchSignature,
+  getEditorialMatchCards,
+} from "@/lib/editorial-matches";
+import { getChampionshipCanonicalSlug } from "@/lib/championship-data";
 import { isMatchStatus } from "@/lib/match-status";
+import { parseMatchTeams } from "@/lib/match-teams";
 import { prisma } from "@/lib/prisma";
 
 function parseOptionalScore(value: FormDataEntryValue | null) {
@@ -188,6 +194,140 @@ export async function createMatch(formData: FormData) {
 
   revalidateMatchPages();
   redirectWithFormSuccess("/admin/matches", "Матч успішно створено.");
+}
+
+function normalizeLookupValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9а-яіїєґ]+/gi, " ")
+    .trim();
+}
+
+export async function importEditorialMatch(editorialId: string) {
+  await requireAdmin();
+
+  const editorialMatch = getEditorialMatchCards().find(
+    (match) => match.id === editorialId,
+  );
+
+  if (!editorialMatch) {
+    redirectWithFormError(
+      "/admin/matches",
+      "Не вдалося знайти редакційний матч для імпорту.",
+    );
+  }
+
+  const parsedTeams =
+    editorialMatch.parsedTeams ?? parseMatchTeams(editorialMatch.teams);
+
+  if (!parsedTeams) {
+    redirectWithFormError(
+      "/admin/matches",
+      "Не вдалося розібрати пари команд у редакційному матчі.",
+    );
+  }
+
+  const championship = await prisma.championship.findFirst({
+    where: {
+      OR: [
+        { slug: editorialMatch.championshipSlug },
+        { title: editorialMatch.championshipTitle },
+        {
+          slug: getChampionshipCanonicalSlug({
+            slug: editorialMatch.championshipSlug,
+            title: editorialMatch.championshipTitle,
+          }),
+        },
+      ],
+    },
+  });
+
+  if (!championship) {
+    redirectWithFormError(
+      "/admin/matches",
+      "Спочатку додайте відповідний чемпіонат у адмінку, а потім імпортуйте матч.",
+    );
+  }
+
+  const teams = await prisma.team.findMany({
+    where: {
+      OR: [{ name: parsedTeams.homeName }, { name: parsedTeams.awayName }],
+    },
+  });
+
+  const homeTeam = teams.find(
+    (team) =>
+      normalizeLookupValue(team.name) ===
+      normalizeLookupValue(parsedTeams.homeName),
+  );
+  const awayTeam = teams.find(
+    (team) =>
+      normalizeLookupValue(team.name) ===
+      normalizeLookupValue(parsedTeams.awayName),
+  );
+
+  if (!homeTeam || !awayTeam) {
+    redirectWithFormError(
+      "/admin/matches",
+      "Спочатку додайте обидві команди в адмінку, а потім імпортуйте матч.",
+    );
+  }
+
+  const existingMatches = await prisma.match.findMany({
+    include: {
+      championship: true,
+      homeTeam: true,
+      awayTeam: true,
+    },
+  });
+
+  const targetSignature = buildEditorialMatchSignature({
+    championshipSlug: championship.slug,
+    round: editorialMatch.round,
+    homeName: parsedTeams.homeName,
+    awayName: parsedTeams.awayName,
+  });
+
+  const duplicate = existingMatches.find((match) => {
+    const signature = buildEditorialMatchSignature({
+      championshipSlug: match.championship.slug,
+      round: match.round,
+      homeName: match.homeTeam.name,
+      awayName: match.awayTeam.name,
+    });
+
+    return signature === targetSignature;
+  });
+
+  if (duplicate) {
+    redirectWithFormSuccess(
+      "/admin/matches",
+      "Такий матч уже є в адмінці і доступний для редагування.",
+    );
+  }
+
+  await prisma.match.create({
+    data: {
+      id: createMatchId(),
+      championshipId: championship.id,
+      homeTeamId: homeTeam.id,
+      awayTeamId: awayTeam.id,
+      status: editorialMatch.status,
+      round: editorialMatch.round,
+      date: editorialMatch.parsedDate ?? new Date(),
+      location: editorialMatch.venueText,
+      homeScore: parsedTeams.homeScore,
+      awayScore: parsedTeams.awayScore,
+    },
+  });
+
+  revalidateMatchPages();
+  redirectWithFormSuccess(
+    "/admin/matches",
+    "Редакційний матч додано в адмінку. Тепер його можна редагувати або видаляти.",
+  );
 }
 
 export async function updateMatch(id: string, formData: FormData) {
