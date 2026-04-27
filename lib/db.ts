@@ -357,8 +357,19 @@ export async function getNewsArticle(slug: string) {
 }
 
 export async function getAdminArticleBySlug(slug: string) {
-  return prisma.article.findUnique({
-    where: { slug },
+  const normalizedSlug = slug.trim();
+  let decodedSlug = normalizedSlug;
+
+  try {
+    decodedSlug = decodeURIComponent(normalizedSlug).trim();
+  } catch {
+    decodedSlug = normalizedSlug;
+  }
+
+  return prisma.article.findFirst({
+    where: {
+      OR: [{ slug: normalizedSlug }, { slug: decodedSlug }],
+    },
     include: {
       comments: {
         include: {
