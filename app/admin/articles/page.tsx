@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   createArticle,
   deleteArticle,
+  importEditorialArticle,
   toggleArticlePublished,
 } from "@/app/admin/articles/actions";
 import { AdminPageHeader } from "@/components/admin-page-header";
@@ -40,6 +41,7 @@ function renderArticleCard(
   statusFilter: string,
 ) {
   const tags = extractTags(article.tags);
+  const isEditorialOnly = article.authorId === "editorial";
 
   return (
     <article
@@ -60,6 +62,14 @@ function renderArticleCard(
             >
               {article.published ? "Опубліковано" : "Чернетка"}
             </span>
+            {isEditorialOnly ? (
+              <>
+                <span className="text-slate-300">•</span>
+                <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+                  Редакційний матеріал
+                </span>
+              </>
+            ) : null}
             {tags.length > 0 ? <span className="text-slate-300">•</span> : null}
             {tags.length > 0 ? <span>{tags.join(", ")}</span> : null}
           </div>
@@ -68,32 +78,36 @@ function renderArticleCard(
           </h3>
           <p className="text-sm leading-7 text-slate-600">{article.excerpt}</p>
           <p className="text-xs leading-6 text-slate-500">
-            {article.published
+            {isEditorialOnly
+              ? "Матеріал зараз підтягується з редакційного override. Додайте його в адмінку, якщо хочете редагувати текст, фото чи статус публікації."
+              : article.published
               ? "Матеріал зараз видимий читачам у розділі новин і в пошуку."
               : "Матеріал зараз лишається чернеткою і видимий лише в адмінці."}
           </p>
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <form
-            action={toggleArticlePublished.bind(
-              null,
-              article.slug,
-              !article.published,
-              statusFilter,
-            )}
-          >
-            <button
-              type="submit"
-              className={`inline-flex rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                article.published
-                  ? "border border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300 hover:bg-amber-100"
-                  : "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100"
-              }`}
+          {!isEditorialOnly ? (
+            <form
+              action={toggleArticlePublished.bind(
+                null,
+                article.slug,
+                !article.published,
+                statusFilter,
+              )}
             >
-              {article.published ? "У чернетку" : "Опублікувати"}
-            </button>
-          </form>
+              <button
+                type="submit"
+                className={`inline-flex rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                  article.published
+                    ? "border border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300 hover:bg-amber-100"
+                    : "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100"
+                }`}
+              >
+                {article.published ? "У чернетку" : "Опублікувати"}
+              </button>
+            </form>
+          ) : null}
           {article.published ? (
             <Link
               href={`/news/${article.slug}`}
@@ -102,20 +116,35 @@ function renderArticleCard(
               Перегляд
             </Link>
           ) : null}
-          <Link
-            href={`/admin/articles/${article.slug}`}
-            className="dark-pill-button inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
-          >
-            Редагувати
-          </Link>
-          <form action={deleteArticle.bind(null, article.slug)}>
-            <button
-              type="submit"
-              className="inline-flex rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition-colors hover:border-rose-300 hover:bg-rose-100"
+          {isEditorialOnly ? (
+            <form
+              action={importEditorialArticle.bind(null, article.slug, statusFilter)}
             >
-              Видалити
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="dark-pill-button inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
+              >
+                Додати в адмінку
+              </button>
+            </form>
+          ) : (
+            <>
+              <Link
+                href={`/admin/articles/${article.slug}`}
+                className="dark-pill-button inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-800"
+              >
+                Редагувати
+              </Link>
+              <form action={deleteArticle.bind(null, article.slug)}>
+                <button
+                  type="submit"
+                  className="inline-flex rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition-colors hover:border-rose-300 hover:bg-rose-100"
+                >
+                  Видалити
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </div>
     </article>

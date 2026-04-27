@@ -137,9 +137,11 @@ export async function getPaginatedNewsList(page: number, limit = NEWS_PAGE_SIZE)
 }
 
 export async function getAdminArticles() {
-  return prisma.article.findMany({
+  const dbArticles = await prisma.article.findMany({
     orderBy: { date: "desc" },
   });
+
+  return mergeEditorialArticles(dbArticles);
 }
 
 export async function getAdminComments() {

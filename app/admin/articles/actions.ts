@@ -7,6 +7,7 @@ import {
   redirectWithFormSuccess,
 } from "@/lib/admin-form-errors";
 import { resolveImageUpload, UploadStorageError } from "@/lib/uploads";
+import { getEditorialArticleBySlug } from "@/lib/editorial-news";
 import {
   createArticleId,
   createSlug,
@@ -30,20 +31,6 @@ export async function createArticle(formData: FormData) {
   const date = String(formData.get("date") ?? "").trim();
   const tags = String(formData.get("tags") ?? "").trim();
   const published = formData.get("published") === "on";
-  let image: string;
-
-  try {
-    image = await resolveImageUpload({
-      formData,
-      folder: "articles",
-    });
-  } catch (error) {
-    if (error instanceof UploadStorageError) {
-      redirectWithFormError("/admin/articles", error.message);
-    }
-
-    throw error;
-  }
 
   if (!title || !excerpt || !content || !date) {
     redirectWithFormError(
@@ -56,38 +43,54 @@ export async function createArticle(formData: FormData) {
     redirectWithFormError("/admin/articles", "Вкажіть коректну дату статті.");
   }
 
-  const slugBase = createSlug(title);
-  let slug = slugBase;
-  let counter = 1;
+  try {
+    const image = await resolveImageUpload({
+      formData,
+      folder: "articles",
+    });
 
-  while (await prisma.article.findUnique({ where: { slug } })) {
-    counter += 1;
-    slug = `${slugBase}-${counter}`;
+    const slugBase = createSlug(title);
+    let slug = slugBase;
+    let counter = 1;
+
+    while (await prisma.article.findUnique({ where: { slug } })) {
+      counter += 1;
+      slug = `${slugBase}-${counter}`;
+    }
+
+    await prisma.article.create({
+      data: {
+        id: createArticleId(),
+        slug,
+        title,
+        excerpt,
+        content,
+        image,
+        date: new Date(date),
+        tags: parseTags(tags),
+        published,
+        authorId: admin.id,
+      },
+    });
+
+    revalidateArticlePaths(slug);
+    revalidatePath("/admin/articles");
+    redirectWithFormSuccess(
+      "/admin/articles",
+      published
+        ? "Статтю створено і одразу опубліковано."
+        : "Чернетку створено. Вона поки не видима на сайті.",
+    );
+  } catch (error) {
+    if (error instanceof UploadStorageError) {
+      redirectWithFormError("/admin/articles", error.message);
+    }
+
+    redirectWithFormError(
+      "/admin/articles",
+      "Не вдалося зберегти статтю разом із зображенням. Спробуйте ще раз або вкажіть шлях до картинки вручну.",
+    );
   }
-
-  await prisma.article.create({
-    data: {
-      id: createArticleId(),
-      slug,
-      title,
-      excerpt,
-      content,
-      image,
-      date: new Date(date),
-      tags: parseTags(tags),
-      published,
-      authorId: admin.id,
-    },
-  });
-
-  revalidateArticlePaths(slug);
-  revalidatePath("/admin/articles");
-  redirectWithFormSuccess(
-    "/admin/articles",
-    published
-      ? "Статтю створено і одразу опубліковано."
-      : "Чернетку створено. Вона поки не видима на сайті.",
-  );
 }
 
 export async function updateArticle(slug: string, formData: FormData) {
@@ -103,21 +106,6 @@ export async function updateArticle(slug: string, formData: FormData) {
     where: { slug },
     select: { image: true },
   });
-  let image: string;
-
-  try {
-    image = await resolveImageUpload({
-      formData,
-      folder: "articles",
-      fallbackImage: currentArticle?.image ?? "",
-    });
-  } catch (error) {
-    if (error instanceof UploadStorageError) {
-      redirectWithFormError(`/admin/articles/${slug}`, error.message);
-    }
-
-    throw error;
-  }
 
   if (!title || !excerpt || !content || !date) {
     redirectWithFormError(
@@ -133,26 +121,43 @@ export async function updateArticle(slug: string, formData: FormData) {
     );
   }
 
-  await prisma.article.update({
-    where: { slug },
-    data: {
-      title,
-      excerpt,
-      content,
-      image,
-      date: new Date(date),
-      tags: parseTags(tags),
-      published,
-    },
-  });
+  try {
+    const image = await resolveImageUpload({
+      formData,
+      folder: "articles",
+      fallbackImage: currentArticle?.image ?? "",
+    });
 
-  revalidateArticlePaths(slug);
-  redirectWithFormSuccess(
-    "/admin/articles",
-    published
-      ? "Зміни збережено. Стаття лишається опублікованою."
-      : "Зміни збережено. Стаття лишається у чернетках.",
-  );
+    await prisma.article.update({
+      where: { slug },
+      data: {
+        title,
+        excerpt,
+        content,
+        image,
+        date: new Date(date),
+        tags: parseTags(tags),
+        published,
+      },
+    });
+
+    revalidateArticlePaths(slug);
+    redirectWithFormSuccess(
+      "/admin/articles",
+      published
+        ? "Зміни збережено. Стаття лишається опублікованою."
+        : "Зміни збережено. Стаття лишається у чернетках.",
+    );
+  } catch (error) {
+    if (error instanceof UploadStorageError) {
+      redirectWithFormError(`/admin/articles/${slug}`, error.message);
+    }
+
+    redirectWithFormError(
+      `/admin/articles/${slug}`,
+      "Не вдалося зберегти зміни разом із новим зображенням. Спробуйте ще раз або вкажіть шлях до картинки вручну.",
+    );
+  }
 }
 
 export async function deleteArticle(slug: string) {
@@ -187,5 +192,53 @@ export async function toggleArticlePublished(
     nextPublished
       ? "Статтю опубліковано. Вона вже доступна на сайті."
       : "Статтю повернуто в чернетки. Вона більше не показується публічно.",
+  );
+}
+
+export async function importEditorialArticle(
+  editorialSlug: string,
+  statusFilter: string,
+) {
+  const admin = await requireEditorAccess("/admin/articles");
+  const editorialArticle = getEditorialArticleBySlug(editorialSlug);
+
+  if (!editorialArticle) {
+    redirectWithFormError(
+      `/admin/articles?status=${statusFilter}`,
+      "Редакційний матеріал не знайдено.",
+    );
+  }
+
+  const existingArticle = await prisma.article.findUnique({
+    where: { slug: editorialSlug },
+    select: { slug: true },
+  });
+
+  if (existingArticle) {
+    redirectWithFormSuccess(
+      `/admin/articles?status=${statusFilter}`,
+      "Матеріал уже є в адмінці й готовий до редагування.",
+    );
+  }
+
+  await prisma.article.create({
+    data: {
+      id: createArticleId(),
+      slug: editorialArticle.slug,
+      title: editorialArticle.title,
+      excerpt: editorialArticle.excerpt,
+      content: editorialArticle.content,
+      image: editorialArticle.image,
+      date: editorialArticle.date,
+      tags: parseTags(editorialArticle.tags.join(", ")),
+      published: true,
+      authorId: admin.id,
+    },
+  });
+
+  revalidateArticlePaths(editorialArticle.slug);
+  redirectWithFormSuccess(
+    `/admin/articles?status=${statusFilter}`,
+    "Матеріал додано в адмінку. Тепер його можна редагувати як звичайну статтю.",
   );
 }
