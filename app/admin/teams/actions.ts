@@ -7,6 +7,7 @@ import {
   redirectWithFormError,
   redirectWithFormSuccess,
 } from "@/lib/admin-form-errors";
+import { getEditorialTeams } from "@/lib/editorial-teams";
 import { resolveImageUpload, UploadStorageError } from "@/lib/uploads";
 import { createSlug, createTeamId, requireAdmin } from "@/lib/admin";
 
@@ -69,6 +70,62 @@ export async function createTeam(formData: FormData) {
   revalidatePath("/search");
   revalidatePath("/admin/teams");
   redirectWithFormSuccess("/admin/teams", "Команду успішно створено.");
+}
+
+export async function importEditorialTeam(editorialId: string) {
+  await requireAdmin();
+
+  const editorialTeam = getEditorialTeams().find((team) => team.id === editorialId);
+
+  if (!editorialTeam) {
+    redirectWithFormError(
+      "/admin/teams",
+      "Не вдалося знайти редакційну команду для імпорту.",
+    );
+  }
+
+  const slugBase = createSlug(editorialTeam.name);
+  let slug = slugBase;
+  let counter = 1;
+
+  while (await prisma.team.findUnique({ where: { slug } })) {
+    counter += 1;
+    slug = `${slugBase}-${counter}`;
+  }
+
+  const existingByName = await prisma.team.findFirst({
+    where: { name: editorialTeam.name },
+  });
+
+  if (existingByName) {
+    redirectWithFormSuccess(
+      "/admin/teams",
+      "Така команда вже є в адмінці і доступна для редагування.",
+    );
+  }
+
+  await prisma.team.create({
+    data: {
+      id: createTeamId(),
+      slug,
+      name: editorialTeam.name,
+      short: editorialTeam.short,
+      country: editorialTeam.country,
+      level: editorialTeam.level,
+      stadium: editorialTeam.stadium,
+      description: editorialTeam.description,
+      image: editorialTeam.image,
+    },
+  });
+
+  revalidatePath("/teams");
+  revalidatePath("/");
+  revalidatePath("/search");
+  revalidatePath("/admin/teams");
+  redirectWithFormSuccess(
+    "/admin/teams",
+    "Редакційну команду додано в адмінку. Тепер її можна редагувати або видаляти.",
+  );
 }
 
 export async function updateTeam(slug: string, formData: FormData) {

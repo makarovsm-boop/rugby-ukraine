@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { createTeam, deleteTeam } from "@/app/admin/teams/actions";
+import {
+  createTeam,
+  deleteTeam,
+  importEditorialTeam,
+} from "@/app/admin/teams/actions";
 import { AdminPageHeader } from "@/components/admin-page-header";
 import {
   AdminFormField,
@@ -15,6 +19,7 @@ import {
   getFormErrorMessage,
   getFormSuccessMessage,
 } from "@/lib/admin-form-errors";
+import { getEditorialTeams } from "@/lib/editorial-teams";
 import { getAdminTeams } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin";
 
@@ -34,6 +39,11 @@ export default async function AdminTeamsPage({ searchParams }: AdminTeamsPagePro
   await requireAdmin();
   const { error, success } = await searchParams;
   const teams = await getAdminTeams();
+  const editorialTeams = getEditorialTeams();
+  const existingTeamNames = new Set(teams.map((team) => team.name.trim().toLowerCase()));
+  const importableEditorialTeams = editorialTeams.filter(
+    (team) => !existingTeamNames.has(team.name.trim().toLowerCase()),
+  );
   const errorMessage = getFormErrorMessage(error);
   const successMessage = getFormSuccessMessage(success);
 
@@ -147,6 +157,57 @@ export default async function AdminTeamsPage({ searchParams }: AdminTeamsPagePro
             </article>
           );
         })}
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-slate-950">
+            Команди з опублікованих чемпіонатів
+          </h2>
+          <p className="mt-2 text-sm leading-7 text-slate-600">
+            Тут зібрані команди, які вже зустрічаються у публічних чемпіонатах і
+            матчах, але ще не додані у звичайний розділ `Команди`.
+          </p>
+        </div>
+
+        {importableEditorialTeams.length > 0 ? (
+          importableEditorialTeams.map((team) => (
+            <article
+              key={team.id}
+              className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(11,31,58,0.05)]"
+            >
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                    <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
+                      {team.country}
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span>{team.short}</span>
+                    <span className="text-slate-300">•</span>
+                    <span>{team.level}</span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-950">
+                    {team.name}
+                  </h3>
+                  <p className="text-sm leading-7 text-slate-600">
+                    Джерела: {team.sources.join(", ")}
+                  </p>
+                </div>
+
+                <form action={importEditorialTeam.bind(null, team.id)}>
+                  <button type="submit" className={adminPrimaryButtonClass}>
+                    Додати в адмінку
+                  </button>
+                </form>
+              </div>
+            </article>
+          ))
+        ) : (
+          <section className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white px-6 py-10 text-center text-slate-600">
+            Усі редакційні команди вже додані в адмінку або їх поки немає.
+          </section>
+        )}
       </section>
     </div>
   );
