@@ -32,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const articlePages = articles.map((article) => ({
-    url: `${siteConfig.url}/news/${article.slug}`,
+      url: `${siteConfig.url}/news/${encodeURIComponent(article.slug)}`,
     lastModified: article.updatedAt,
   }));
 

@@ -85,7 +85,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
       itemListElement: newsArticles.map((article, index) => ({
         "@type": "ListItem",
         position: index + 1,
-        url: `${siteConfig.url}/news/${article.slug}`,
+        url: `${siteConfig.url}/news/${encodeURIComponent(article.slug)}`,
         name: article.title,
       })),
     },
@@ -171,7 +171,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                   </p>
 
                   <Link
-                    href={`/news/${featuredArticle.slug}`}
+                    href={`/news/${encodeURIComponent(featuredArticle.slug)}`}
                     className="mt-6 inline-flex w-fit rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-dark)]"
                   >
                     Читати матеріал
@@ -224,7 +224,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                   </p>
 
                   <Link
-                    href={`/news/${article.slug}`}
+                    href={`/news/${encodeURIComponent(article.slug)}`}
                     className="inline-flex rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-dark)]"
                   >
                     Читати далі

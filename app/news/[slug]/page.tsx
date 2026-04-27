@@ -49,12 +49,12 @@ export async function generateMetadata({
     title: buildTitle(article.title),
     description: article.excerpt,
     alternates: {
-      canonical: `/news/${article.slug}`,
+      canonical: `/news/${encodeURIComponent(article.slug)}`,
     },
     openGraph: {
       title: buildTitle(article.title),
       description: article.excerpt,
-      url: `${siteConfig.url}/news/${article.slug}`,
+      url: `${siteConfig.url}/news/${encodeURIComponent(article.slug)}`,
       type: "article",
       images: [
         {
@@ -103,8 +103,8 @@ export default async function NewsArticlePage({
     description: article.excerpt,
     datePublished: article.date.toISOString(),
     dateModified: article.updatedAt.toISOString(),
-    mainEntityOfPage: `${siteConfig.url}/news/${article.slug}`,
-    url: `${siteConfig.url}/news/${article.slug}`,
+    mainEntityOfPage: `${siteConfig.url}/news/${encodeURIComponent(article.slug)}`,
+    url: `${siteConfig.url}/news/${encodeURIComponent(article.slug)}`,
     image: [safeImage],
     articleSection: "Новини",
     keywords: tags,
@@ -252,7 +252,7 @@ export default async function NewsArticlePage({
               ви зможете одразу залишити свою думку під матеріалом.
             </p>
             <Link
-              href={`/login?callbackUrl=/news/${article.slug}`}
+              href={`/login?callbackUrl=${encodeURIComponent(`/news/${encodeURIComponent(article.slug)}`)}`}
               className="mt-4 inline-flex rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-dark)]"
             >
               Увійти для коментування
@@ -343,7 +343,7 @@ export default async function NewsArticlePage({
                 {relatedArticle.excerpt}
               </p>
               <Link
-                href={`/news/${relatedArticle.slug}`}
+                href={`/news/${encodeURIComponent(relatedArticle.slug)}`}
                 className="mt-5 inline-flex text-sm font-semibold text-[var(--accent)]"
               >
                 Відкрити матеріал

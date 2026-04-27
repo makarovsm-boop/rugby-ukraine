@@ -338,9 +338,18 @@ export async function getAllPublicMatches() {
 }
 
 export async function getNewsArticle(slug: string) {
+  const normalizedSlug = slug.trim();
+  let decodedSlug = normalizedSlug;
+
+  try {
+    decodedSlug = decodeURIComponent(normalizedSlug).trim();
+  } catch {
+    decodedSlug = normalizedSlug;
+  }
+
   const article = await prisma.article.findFirst({
     where: {
-      slug,
+      OR: [{ slug: normalizedSlug }, { slug: decodedSlug }],
       published: true,
     },
     include: {
@@ -353,7 +362,11 @@ export async function getNewsArticle(slug: string) {
     },
   });
 
-  return article ?? getEditorialArticleBySlug(slug);
+  return (
+    article ??
+    getEditorialArticleBySlug(normalizedSlug) ??
+    getEditorialArticleBySlug(decodedSlug)
+  );
 }
 
 export async function getAdminArticleBySlug(slug: string) {
@@ -382,16 +395,30 @@ export async function getAdminArticleBySlug(slug: string) {
 }
 
 export async function getRelatedNews(slug: string) {
+  const normalizedSlug = slug.trim();
+  let decodedSlug = normalizedSlug;
+
+  try {
+    decodedSlug = decodeURIComponent(normalizedSlug).trim();
+  } catch {
+    decodedSlug = normalizedSlug;
+  }
+
   const dbArticles = await prisma.article.findMany({
     where: {
       published: true,
-      NOT: { slug },
+      NOT: {
+        OR: [{ slug: normalizedSlug }, { slug: decodedSlug }],
+      },
     },
     orderBy: { date: "desc" },
   });
 
   return mergeEditorialArticles(dbArticles)
-    .filter((article) => article.slug !== slug)
+    .filter(
+      (article) =>
+        article.slug !== normalizedSlug && article.slug !== decodedSlug,
+    )
     .slice(0, 2);
 }
 

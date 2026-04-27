@@ -176,7 +176,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     ...dbData.articles.map((article) => ({
       title: article.title,
       excerpt: article.excerpt,
-      href: `/news/${article.slug}`,
+      href: `/news/${encodeURIComponent(article.slug)}`,
       type: "Новина",
       section: "Новини",
       meta: article.date.toLocaleDateString("uk-UA"),

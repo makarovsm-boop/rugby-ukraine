@@ -153,7 +153,7 @@ export default async function AdminCommentsPage({
 
                 <div className="flex gap-3">
                   <Link
-                    href={`/news/${comment.article.slug}`}
+                    href={`/news/${encodeURIComponent(comment.article.slug)}`}
                     className={adminNeutralButtonClass}
                   >
                     Відкрити статтю

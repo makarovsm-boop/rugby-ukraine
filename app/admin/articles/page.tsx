@@ -110,7 +110,7 @@ function renderArticleCard(
           ) : null}
           {article.published ? (
             <Link
-              href={`/news/${article.slug}`}
+              href={`/news/${encodeURIComponent(article.slug.trim())}`}
               className="inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
             >
               Перегляд

@@ -277,7 +277,7 @@ export default async function Home() {
                       Увесь розділ
                     </Link>
                     <Link
-                      href={`/news/${article.slug}`}
+                      href={`/news/${encodeURIComponent(article.slug)}`}
                       className="text-sm font-semibold text-[var(--accent)]"
                     >
                       Читати далі

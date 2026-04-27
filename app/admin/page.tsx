@@ -175,7 +175,7 @@ export default async function AdminDashboardPage() {
                     {comment.content}
                   </p>
                   <Link
-                    href={`/news/${comment.article.slug}`}
+                    href={`/news/${encodeURIComponent(comment.article.slug)}`}
                     className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]"
                   >
                     Перейти до статті
