@@ -44,44 +44,12 @@ export async function createArticle(formData: FormData) {
     redirectWithFormError("/admin/articles", "Вкажіть коректну дату статті.");
   }
 
+  let image: string;
   try {
-    const image = await resolveImageUpload({
+    image = await resolveImageUpload({
       formData,
       folder: "articles",
     });
-
-    const slugBase = createSlug(title);
-    let slug = slugBase;
-    let counter = 1;
-
-    while (await prisma.article.findUnique({ where: { slug } })) {
-      counter += 1;
-      slug = `${slugBase}-${counter}`;
-    }
-
-    await prisma.article.create({
-      data: {
-        id: createArticleId(),
-        slug,
-        title,
-        excerpt,
-        content,
-        image,
-        date: new Date(date),
-        tags: parseTags(tags),
-        published,
-        authorId: admin.id,
-      },
-    });
-
-    revalidateArticlePaths(slug);
-    revalidatePath("/admin/articles");
-    redirectWithFormSuccess(
-      "/admin/articles",
-      published
-        ? "Статтю створено і одразу опубліковано."
-        : "Чернетку створено. Вона поки не видима на сайті.",
-    );
   } catch (error) {
     unstable_rethrow(error);
 
@@ -94,6 +62,39 @@ export async function createArticle(formData: FormData) {
       "Не вдалося зберегти статтю разом із зображенням. Спробуйте ще раз або вкажіть шлях до картинки вручну.",
     );
   }
+
+  const slugBase = createSlug(title);
+  let slug = slugBase;
+  let counter = 1;
+
+  while (await prisma.article.findUnique({ where: { slug } })) {
+    counter += 1;
+    slug = `${slugBase}-${counter}`;
+  }
+
+  await prisma.article.create({
+    data: {
+      id: createArticleId(),
+      slug,
+      title,
+      excerpt,
+      content,
+      image,
+      date: new Date(date),
+      tags: parseTags(tags),
+      published,
+      authorId: admin.id,
+    },
+  });
+
+  revalidateArticlePaths(slug);
+  revalidatePath("/admin/articles");
+  redirectWithFormSuccess(
+    "/admin/articles",
+    published
+      ? "Статтю створено і одразу опубліковано."
+      : "Чернетку створено. Вона поки не видима на сайті.",
+  );
 }
 
 export async function updateArticle(slug: string, formData: FormData) {
@@ -124,33 +125,13 @@ export async function updateArticle(slug: string, formData: FormData) {
     );
   }
 
+  let image: string;
   try {
-    const image = await resolveImageUpload({
+    image = await resolveImageUpload({
       formData,
       folder: "articles",
       fallbackImage: currentArticle?.image ?? "",
     });
-
-    await prisma.article.update({
-      where: { slug },
-      data: {
-        title,
-        excerpt,
-        content,
-        image,
-        date: new Date(date),
-        tags: parseTags(tags),
-        published,
-      },
-    });
-
-    revalidateArticlePaths(slug);
-    redirectWithFormSuccess(
-      "/admin/articles",
-      published
-        ? "Зміни збережено. Стаття лишається опублікованою."
-        : "Зміни збережено. Стаття лишається у чернетках.",
-    );
   } catch (error) {
     unstable_rethrow(error);
 
@@ -163,6 +144,27 @@ export async function updateArticle(slug: string, formData: FormData) {
       "Не вдалося зберегти зміни разом із новим зображенням. Спробуйте ще раз або вкажіть шлях до картинки вручну.",
     );
   }
+
+  await prisma.article.update({
+    where: { slug },
+    data: {
+      title,
+      excerpt,
+      content,
+      image,
+      date: new Date(date),
+      tags: parseTags(tags),
+      published,
+    },
+  });
+
+  revalidateArticlePaths(slug);
+  redirectWithFormSuccess(
+    "/admin/articles",
+    published
+      ? "Зміни збережено. Стаття лишається опублікованою."
+      : "Зміни збережено. Стаття лишається у чернетках.",
+  );
 }
 
 export async function deleteArticle(slug: string) {
