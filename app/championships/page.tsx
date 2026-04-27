@@ -51,7 +51,7 @@ const championshipPriority: Record<string, number> = {
   "чемпіонат європи": 5,
 };
 
-const hiddenRegions = new Set(["Світ", "Міжнародний", "Міжнародні"]);
+const hiddenRegions = new Set(["Світ", "Міжнародний"]);
 
 function normalizeKey(value: string) {
   return value
