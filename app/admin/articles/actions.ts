@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { unstable_rethrow } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import {
   redirectWithFormError,
@@ -83,9 +83,7 @@ export async function createArticle(formData: FormData) {
         : "Чернетку створено. Вона поки не видима на сайті.",
     );
   } catch (error) {
-    if (isRedirectError(error)) {
-      throw error;
-    }
+    unstable_rethrow(error);
 
     if (error instanceof UploadStorageError) {
       redirectWithFormError("/admin/articles", error.message);
@@ -154,9 +152,7 @@ export async function updateArticle(slug: string, formData: FormData) {
         : "Зміни збережено. Стаття лишається у чернетках.",
     );
   } catch (error) {
-    if (isRedirectError(error)) {
-      throw error;
-    }
+    unstable_rethrow(error);
 
     if (error instanceof UploadStorageError) {
       redirectWithFormError(`/admin/articles/${slug}`, error.message);
