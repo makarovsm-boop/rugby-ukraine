@@ -75,7 +75,7 @@ export default async function Home() {
           </span>
           <div className="space-y-4">
             <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-              Усе головне про українське регбі та ключові події сезону в одному місці
+              Усе головне про світове регбі та ключові події в одному місці
             </h1>
             <p className="max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
               Новини, матчі, результати й базові пояснення зібрані так, щоб
