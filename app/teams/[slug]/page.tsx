@@ -114,14 +114,22 @@ export default async function TeamPage({ params }: TeamPageProps) {
       homeScore: null,
       awayScore: null,
       championshipTitle: match.championshipTitle,
-      homeTeamName: team.name,
-      awayTeamName: match.opponentName,
+      championshipSlug: match.championshipSlug,
+      homeTeamName: match.homeName,
+      awayTeamName: match.awayName,
+      homeTeamLogo: match.homeLogo,
+      awayTeamLogo: match.awayLogo,
       source: "editorial" as const,
     }),
   );
   const calendarMatches =
     matches.length > 0
-      ? matches.map((match) => ({ ...match, source: "db" as const }))
+      ? matches.map((match) => ({
+          ...match,
+          homeTeamLogo: match.homeTeamName === team.name ? team.image : undefined,
+          awayTeamLogo: match.awayTeamName === team.name ? team.image : undefined,
+          source: "db" as const,
+        }))
       : editorialUpcomingMatches;
   const mentionedMatches = getEditorialTeamMatchMentions(team.name);
   const matchesOnSite = Math.max(matches.length, mentionedMatches);
@@ -164,12 +172,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
       </Link>
 
       <article className="content-card-strong overflow-hidden rounded-[2rem]">
-        <div className="relative aspect-[16/7]">
+        <div className="relative aspect-[16/7] bg-white">
           <Image
             src={safeImage}
             alt={team.name}
             fill
-            className="object-cover"
+            className={team.name === "Bath Rugby" ? "object-contain p-4" : "object-cover"}
             priority
             sizes="(max-width: 640px) 100vw, (max-width: 1280px) 92vw, 1120px"
           />
@@ -298,6 +306,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
                     <MatchTeamsDisplay
                       homeName={match.homeTeamName}
                       awayName={match.awayTeamName}
+                      homeLogo={match.homeTeamLogo}
+                      awayLogo={match.awayTeamLogo}
                       homeScore={match.homeScore}
                       awayScore={match.awayScore}
                       teamNameClassName="text-lg font-semibold text-slate-950"
@@ -318,6 +328,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]"
                     >
                       Перейти до матчу
+                    </Link>
+                  ) : match.championshipSlug ? (
+                    <Link
+                      href={`/championships/${match.championshipSlug}`}
+                      className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]"
+                    >
+                      До чемпіонату
                     </Link>
                   ) : null}
                 </article>

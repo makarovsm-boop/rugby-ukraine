@@ -139,7 +139,8 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
                 team.name,
               ).map((match) => ({
                 date: match.date,
-                opponentName: match.opponentName,
+                opponentName:
+                  match.homeName === team.name ? match.awayName : match.homeName,
                 source: "editorial" as const,
               }));
               const mergedUpcomingMatches = [

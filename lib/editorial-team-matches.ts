@@ -36,9 +36,13 @@ export function getEditorialTeamMatchMentions(teamName: string) {
 }
 
 export type EditorialTeamUpcomingMatch = {
-  opponentName: string;
+  homeName: string;
+  awayName: string;
+  homeLogo?: string;
+  awayLogo?: string;
   date: Date;
   championshipTitle: string;
+  championshipSlug: string;
   round: string;
 };
 
@@ -72,11 +76,13 @@ export function getEditorialUpcomingMatchesForTeam(
       const isHome = normalizeTeamName(match.parsedTeams!.homeName) === target;
 
       return {
-        opponentName: isHome
-          ? match.parsedTeams!.awayName
-          : match.parsedTeams!.homeName,
+        homeName: match.parsedTeams!.homeName,
+        awayName: match.parsedTeams!.awayName,
+        homeLogo: match.parsedTeams!.homeLogo,
+        awayLogo: match.parsedTeams!.awayLogo,
         date: match.parsedDate!,
         championshipTitle: match.championshipTitle,
+        championshipSlug: match.championshipSlug,
         round: match.round,
       };
     })
