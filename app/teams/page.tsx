@@ -141,7 +141,11 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
                       src={safeImage}
                       alt={team.name}
                       fill
-                      className="object-cover"
+                      className={
+                        team.name === "Bath Rugby"
+                          ? "bg-white object-contain p-4"
+                          : "object-cover"
+                      }
                       priority={index === 0}
                       sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                     />
