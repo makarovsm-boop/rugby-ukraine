@@ -8,6 +8,7 @@ import {
   getTeamFilterOptions,
   getTeamsByFilters,
 } from "@/lib/db";
+import { getEditorialTeamMatchMentions } from "@/lib/editorial-team-matches";
 import { getSafeImagePath } from "@/lib/media";
 import { buildTitle } from "@/lib/seo";
 
@@ -130,6 +131,8 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
                 })),
               ].sort((a, b) => a.date.getTime() - b.date.getTime())[0];
               const totalMatches = team.homeMatches.length + team.awayMatches.length;
+              const mentionedMatches = getEditorialTeamMatchMentions(team.name);
+              const matchesOnSite = Math.max(totalMatches, mentionedMatches);
 
               return (
                 <article
@@ -182,7 +185,7 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
                         </p>
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900">{totalMatches}</p>
+                        <p className="font-semibold text-slate-900">{matchesOnSite}</p>
                         <p className="mt-1 text-xs uppercase tracking-[0.12em] text-slate-500">
                           Матчів
                         </p>

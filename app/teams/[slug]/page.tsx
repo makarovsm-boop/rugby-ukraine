@@ -13,6 +13,7 @@ import {
   getMatchStatusClasses,
   getMatchStatusLabel,
 } from "@/lib/match-status";
+import { getEditorialTeamMatchMentions } from "@/lib/editorial-team-matches";
 import { getSafeImagePath } from "@/lib/media";
 import { buildTitle, siteConfig } from "@/lib/seo";
 
@@ -100,6 +101,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
       awayTeamName: team.name,
     })),
   ].sort((a, b) => a.date.getTime() - b.date.getTime());
+  const mentionedMatches = getEditorialTeamMatchMentions(team.name);
+  const matchesOnSite = Math.max(matches.length, mentionedMatches);
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SportsTeam",
@@ -181,9 +184,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
               </p>
             </div>
             <div>
-              <p className="font-semibold text-slate-900">Матчів у базі</p>
+              <p className="font-semibold text-slate-900">Матчів на сайті</p>
               <p className="mt-2 text-lg font-semibold text-slate-950">
-                {matches.length}
+                {matchesOnSite}
               </p>
             </div>
             <div>

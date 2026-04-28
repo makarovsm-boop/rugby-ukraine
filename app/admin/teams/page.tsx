@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   createTeam,
   deleteTeam,
+  importBathSquadPlayers,
   importEditorialTeam,
 } from "@/app/admin/teams/actions";
 import { AdminPageHeader } from "@/components/admin-page-header";
@@ -98,6 +99,12 @@ export default async function AdminTeamsPage({ searchParams }: AdminTeamsPagePro
 
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold text-slate-950">Усі команди</h2>
+
+        <form action={importBathSquadPlayers}>
+          <button type="submit" className={adminPrimaryButtonClass}>
+            Імпортувати склад Bath Rugby (гравці + фото)
+          </button>
+        </form>
 
         {teams.map((team) => {
           const matchesCount = team.homeMatches.length + team.awayMatches.length;

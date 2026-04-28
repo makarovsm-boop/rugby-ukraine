@@ -7,9 +7,15 @@ import {
   redirectWithFormError,
   redirectWithFormSuccess,
 } from "@/lib/admin-form-errors";
+import { getBathSquadWithSlug } from "@/lib/bath-squad";
 import { getEditorialTeams } from "@/lib/editorial-teams";
 import { resolveImageUpload, UploadStorageError } from "@/lib/uploads";
-import { createSlug, createTeamId, requireAdmin } from "@/lib/admin";
+import {
+  createPlayerId,
+  createSlug,
+  createTeamId,
+  requireAdmin,
+} from "@/lib/admin";
 
 export async function createTeam(formData: FormData) {
   await requireAdmin();
@@ -125,6 +131,76 @@ export async function importEditorialTeam(editorialId: string) {
   redirectWithFormSuccess(
     "/admin/teams",
     "Редакційну команду додано в адмінку. Тепер її можна редагувати або видаляти.",
+  );
+}
+
+export async function importBathSquadPlayers() {
+  await requireAdmin();
+
+  const bathTeam = await prisma.team.findFirst({
+    where: {
+      OR: [{ name: "Bath Rugby" }, { slug: "bath-rugby" }],
+    },
+    select: { id: true },
+  });
+
+  if (!bathTeam) {
+    redirectWithFormError(
+      "/admin/teams",
+      "Спочатку додайте команду Bath Rugby у розділ Команди, а потім імпортуйте склад.",
+    );
+  }
+
+  const squad = getBathSquadWithSlug();
+  const existingPlayers = await prisma.player.findMany({
+    where: { teamId: bathTeam.id },
+    select: { slug: true },
+  });
+  const existingSlugs = new Set(existingPlayers.map((player) => player.slug));
+  const existingCount = existingPlayers.length;
+  let created = 0;
+
+  for (const [index, player] of squad.entries()) {
+    if (existingSlugs.has(player.slug)) {
+      continue;
+    }
+
+    await prisma.player.create({
+      data: {
+        id: createPlayerId(),
+        slug: player.slug,
+        name: player.name,
+        position: player.position,
+        number: existingCount + created + index + 1,
+        age: 25,
+        height: "Н/Д",
+        weight: "Н/Д",
+        summary: `${player.position} Bath Rugby`,
+        bio: `Гравець Bath Rugby. Дані додані з офіційного списку складу клубу.`,
+        image: player.image,
+        teamId: bathTeam.id,
+      },
+    });
+
+    created += 1;
+  }
+
+  revalidatePath("/teams");
+  revalidatePath("/players");
+  revalidatePath("/admin/teams");
+  revalidatePath("/admin/players");
+  revalidatePath("/");
+
+  if (created === 0) {
+    redirectWithFormSuccess(
+      "/admin/teams",
+      "Склад Bath Rugby уже імпортовано раніше. Нових гравців не додано.",
+    );
+  }
+
+  redirectWithFormSuccess(
+    "/admin/teams",
+    `Склад Bath Rugby імпортовано: додано ${created} гравців.`,
   );
 }
 
