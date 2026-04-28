@@ -13,7 +13,10 @@ import {
   getMatchStatusClasses,
   getMatchStatusLabel,
 } from "@/lib/match-status";
-import { getEditorialTeamMatchMentions } from "@/lib/editorial-team-matches";
+import {
+  getEditorialTeamMatchMentions,
+  getEditorialUpcomingMatchesForTeam,
+} from "@/lib/editorial-team-matches";
 import { getSafeImagePath } from "@/lib/media";
 import { buildTitle, siteConfig } from "@/lib/seo";
 
@@ -101,6 +104,25 @@ export default async function TeamPage({ params }: TeamPageProps) {
       awayTeamName: team.name,
     })),
   ].sort((a, b) => a.date.getTime() - b.date.getTime());
+  const editorialUpcomingMatches = getEditorialUpcomingMatchesForTeam(team.name).map(
+    (match, index) => ({
+      id: `editorial-${team.slug}-${index}`,
+      date: match.date,
+      location: "Редакційний календар",
+      round: match.round,
+      status: "upcoming",
+      homeScore: null,
+      awayScore: null,
+      championshipTitle: match.championshipTitle,
+      homeTeamName: team.name,
+      awayTeamName: match.opponentName,
+      source: "editorial" as const,
+    }),
+  );
+  const calendarMatches =
+    matches.length > 0
+      ? matches.map((match) => ({ ...match, source: "db" as const }))
+      : editorialUpcomingMatches;
   const mentionedMatches = getEditorialTeamMatchMentions(team.name);
   const matchesOnSite = Math.max(matches.length, mentionedMatches);
   const structuredData = {
@@ -257,9 +279,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
             </h2>
           </div>
 
-          {matches.length > 0 ? (
+          {calendarMatches.length > 0 ? (
             <div className="space-y-4">
-              {matches.map((match) => (
+              {calendarMatches.map((match) => (
                 <article
                   key={match.id}
                   className="content-card rounded-[1.5rem] p-5"
@@ -290,12 +312,14 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       Рахунок: {match.homeScore}:{match.awayScore}
                     </p>
                   ) : null}
-                  <Link
-                    href={`/matches/${match.id}`}
-                    className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]"
-                  >
-                    Перейти до матчу
-                  </Link>
+                  {match.source === "db" ? (
+                    <Link
+                      href={`/matches/${match.id}`}
+                      className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]"
+                    >
+                      Перейти до матчу
+                    </Link>
+                  ) : null}
                 </article>
               ))}
             </div>
