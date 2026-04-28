@@ -8,6 +8,7 @@ import {
   redirectWithFormSuccess,
 } from "@/lib/admin-form-errors";
 import { getBathSquadWithSlug } from "@/lib/bath-squad";
+import { fetchBathMenPlayersFromApi } from "@/lib/bath-squad-api";
 import { getEditorialTeams } from "@/lib/editorial-teams";
 import { resolveImageUpload, UploadStorageError } from "@/lib/uploads";
 import {
@@ -151,17 +152,56 @@ export async function importBathSquadPlayers() {
     );
   }
 
-  const squad = getBathSquadWithSlug();
+  const fallbackSquad = getBathSquadWithSlug();
   const existingPlayers = await prisma.player.findMany({
     where: { teamId: bathTeam.id },
-    select: { slug: true },
+    select: { id: true, slug: true },
   });
-  const existingSlugs = new Set(existingPlayers.map((player) => player.slug));
+  const existingBySlug = new Map(existingPlayers.map((player) => [player.slug, player]));
   const existingCount = existingPlayers.length;
-  let created = 0;
 
-  for (const [index, player] of squad.entries()) {
-    if (existingSlugs.has(player.slug)) {
+  let created = 0;
+  let updated = 0;
+
+  let sourcePlayers: Array<{
+    slug: string;
+    name: string;
+    position: string;
+    image: string;
+    age: number;
+    height: string;
+    weight: string;
+  }> = [];
+
+  try {
+    sourcePlayers = await fetchBathMenPlayersFromApi();
+  } catch {
+    sourcePlayers = fallbackSquad.map((player) => ({
+      ...player,
+      age: 25,
+      height: "Н/Д",
+      weight: "Н/Д",
+    }));
+  }
+
+  for (const [index, player] of sourcePlayers.entries()) {
+    const existing = existingBySlug.get(player.slug);
+
+    if (existing) {
+      await prisma.player.update({
+        where: { id: existing.id },
+        data: {
+          name: player.name,
+          position: player.position,
+          image: player.image,
+          age: player.age,
+          height: player.height,
+          weight: player.weight,
+          summary: `${player.position} Bath Rugby`,
+          bio: `Гравець Bath Rugby. Дані додані з офіційного списку складу клубу.`,
+        },
+      });
+      updated += 1;
       continue;
     }
 
@@ -172,9 +212,9 @@ export async function importBathSquadPlayers() {
         name: player.name,
         position: player.position,
         number: existingCount + created + index + 1,
-        age: 25,
-        height: "Н/Д",
-        weight: "Н/Д",
+        age: player.age,
+        height: player.height,
+        weight: player.weight,
         summary: `${player.position} Bath Rugby`,
         bio: `Гравець Bath Rugby. Дані додані з офіційного списку складу клубу.`,
         image: player.image,
@@ -191,7 +231,7 @@ export async function importBathSquadPlayers() {
   revalidatePath("/admin/players");
   revalidatePath("/");
 
-  if (created === 0) {
+  if (created === 0 && updated === 0) {
     redirectWithFormSuccess(
       "/admin/teams",
       "Склад Bath Rugby уже імпортовано раніше. Нових гравців не додано.",
@@ -200,7 +240,7 @@ export async function importBathSquadPlayers() {
 
   redirectWithFormSuccess(
     "/admin/teams",
-    `Склад Bath Rugby імпортовано: додано ${created} гравців.`,
+    `Склад Bath Rugby синхронізовано: додано ${created}, оновлено ${updated} гравців.`,
   );
 }
 

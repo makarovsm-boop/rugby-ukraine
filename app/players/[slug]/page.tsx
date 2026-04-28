@@ -78,12 +78,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       </Link>
 
       <article className="content-card-strong overflow-hidden rounded-[2rem]">
-        <div className="relative aspect-[16/7]">
+        <div className="relative aspect-[16/7] bg-white">
           <Image
             src={safeImage}
             alt={player.name}
             fill
-            className="object-cover"
+            className="object-contain p-4"
             priority
             sizes="(max-width: 640px) 100vw, (max-width: 1280px) 92vw, 960px"
           />

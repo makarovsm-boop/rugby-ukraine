@@ -8,7 +8,10 @@ import {
   getTeamFilterOptions,
   getTeamsByFilters,
 } from "@/lib/db";
-import { getEditorialTeamMatchMentions } from "@/lib/editorial-team-matches";
+import {
+  getEditorialTeamMatchMentions,
+  getEditorialUpcomingMatchesForTeam,
+} from "@/lib/editorial-team-matches";
 import { getSafeImagePath } from "@/lib/media";
 import { buildTitle } from "@/lib/seo";
 
@@ -124,12 +127,26 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
                 ...team.homeMatches.map((match) => ({
                   date: match.date,
                   opponentName: match.awayTeam.name,
+                  source: "db" as const,
                 })),
                 ...team.awayMatches.map((match) => ({
                   date: match.date,
                   opponentName: match.homeTeam.name,
+                  source: "db" as const,
                 })),
               ].sort((a, b) => a.date.getTime() - b.date.getTime())[0];
+              const editorialUpcomingMatches = getEditorialUpcomingMatchesForTeam(
+                team.name,
+              ).map((match) => ({
+                date: match.date,
+                opponentName: match.opponentName,
+                source: "editorial" as const,
+              }));
+              const mergedUpcomingMatches = [
+                ...editorialUpcomingMatches,
+                ...(nextMatch ? [nextMatch] : []),
+              ].sort((a, b) => a.date.getTime() - b.date.getTime());
+              const primaryUpcomingMatch = mergedUpcomingMatches[0];
               const totalMatches = team.homeMatches.length + team.awayMatches.length;
               const mentionedMatches = getEditorialTeamMatchMentions(team.name);
               const matchesOnSite = Math.max(totalMatches, mentionedMatches);
@@ -201,9 +218,9 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
                     <div className="rounded-[1.25rem] bg-slate-50 p-4 text-sm text-slate-600">
                       <p className="font-semibold text-slate-900">Найближчий матч</p>
                       <div className="mt-2">
-                        {nextMatch ? (
+                        {primaryUpcomingMatch ? (
                           <TeamBadge
-                            name={nextMatch.opponentName}
+                            name={primaryUpcomingMatch.opponentName}
                             size="sm"
                             nameClassName="text-sm"
                           />
@@ -212,7 +229,9 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
                         )}
                       </div>
                       <p className="mt-1 text-slate-500">
-                        {nextMatch ? formatDateTime(nextMatch.date) : ""}
+                        {primaryUpcomingMatch
+                          ? formatDateTime(primaryUpcomingMatch.date)
+                          : ""}
                       </p>
                       <p className="mt-2 text-slate-500">Арена: {team.stadium}</p>
                     </div>

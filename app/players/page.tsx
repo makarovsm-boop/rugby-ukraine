@@ -42,12 +42,12 @@ export default async function PlayersPage() {
               key={player.slug}
               className="content-card overflow-hidden rounded-[1.5rem]"
             >
-              <div className="relative aspect-[16/10]">
+              <div className="relative aspect-[16/10] bg-white">
                 <Image
                   src={safeImage}
                   alt={player.name}
                   fill
-                  className="object-cover"
+                  className="object-contain p-3"
                   priority={index === 0}
                   sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                 />
