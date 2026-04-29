@@ -127,22 +127,28 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
                 ...team.homeMatches.map((match) => ({
                   date: match.date,
                   opponentName: match.awayTeam.name,
+                  opponentLogo: match.awayTeam.image ?? undefined,
                   source: "db" as const,
                 })),
                 ...team.awayMatches.map((match) => ({
                   date: match.date,
                   opponentName: match.homeTeam.name,
+                  opponentLogo: match.homeTeam.image ?? undefined,
                   source: "db" as const,
                 })),
               ].sort((a, b) => a.date.getTime() - b.date.getTime())[0];
               const editorialUpcomingMatches = getEditorialUpcomingMatchesForTeam(
                 team.name,
-              ).map((match) => ({
-                date: match.date,
-                opponentName:
-                  match.homeName === team.name ? match.awayName : match.homeName,
-                source: "editorial" as const,
-              }));
+              ).map((match) => {
+                const isHome = match.homeName === team.name;
+
+                return {
+                  date: match.date,
+                  opponentName: isHome ? match.awayName : match.homeName,
+                  opponentLogo: isHome ? match.awayLogo : match.homeLogo,
+                  source: "editorial" as const,
+                };
+              });
               const mergedUpcomingMatches = [
                 ...editorialUpcomingMatches,
                 ...(nextMatch ? [nextMatch] : []),
@@ -218,6 +224,7 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
                         {primaryUpcomingMatch ? (
                           <TeamBadge
                             name={primaryUpcomingMatch.opponentName}
+                            logo={primaryUpcomingMatch.opponentLogo}
                             size="sm"
                             nameClassName="text-sm"
                           />
