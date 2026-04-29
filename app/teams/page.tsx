@@ -157,16 +157,12 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
                   key={team.slug}
                   className="content-card overflow-hidden rounded-[1.5rem]"
                 >
-                  <div className="relative aspect-[16/10]">
+                  <div className="relative aspect-[16/10] bg-white">
                     <Image
                       src={safeImage}
                       alt={team.name}
                       fill
-                      className={
-                        team.name === "Bath Rugby"
-                          ? "bg-white object-contain p-4"
-                          : "object-cover"
-                      }
+                      className="object-contain p-4"
                       priority={index === 0}
                       sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                     />

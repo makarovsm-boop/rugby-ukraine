@@ -88,8 +88,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
       homeScore: match.homeScore,
       awayScore: match.awayScore,
       championshipTitle: match.championship.title,
+      championshipSlug: match.championship.slug,
       homeTeamName: team.name,
+      homeTeamLogo: team.image ?? undefined,
       awayTeamName: match.awayTeam.name,
+      awayTeamLogo: match.awayTeam.image ?? undefined,
     })),
     ...team.awayMatches.map((match) => ({
       id: match.id,
@@ -100,8 +103,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
       homeScore: match.homeScore,
       awayScore: match.awayScore,
       championshipTitle: match.championship.title,
+      championshipSlug: match.championship.slug,
       homeTeamName: match.homeTeam.name,
+      homeTeamLogo: match.homeTeam.image ?? undefined,
       awayTeamName: team.name,
+      awayTeamLogo: team.image ?? undefined,
     })),
   ].sort((a, b) => a.date.getTime() - b.date.getTime());
   const editorialUpcomingMatches = getEditorialUpcomingMatchesForTeam(team.name).map(
@@ -124,12 +130,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
   );
   const calendarMatches =
     matches.length > 0
-      ? matches.map((match) => ({
-          ...match,
-          homeTeamLogo: match.homeTeamName === team.name ? team.image : undefined,
-          awayTeamLogo: match.awayTeamName === team.name ? team.image : undefined,
-          source: "db" as const,
-        }))
+      ? matches.map((match) => ({ ...match, source: "db" as const }))
       : editorialUpcomingMatches;
   const mentionedMatches = getEditorialTeamMatchMentions(team.name);
   const matchesOnSite = Math.max(matches.length, mentionedMatches);
@@ -177,7 +178,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
             src={safeImage}
             alt={team.name}
             fill
-            className={team.name === "Bath Rugby" ? "object-contain p-4" : "object-cover"}
+            className="object-contain p-4"
             priority
             sizes="(max-width: 640px) 100vw, (max-width: 1280px) 92vw, 1120px"
           />
