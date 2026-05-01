@@ -131,19 +131,6 @@ export default async function Home() {
                   className="sm:flex-col sm:items-start lg:flex-row lg:items-center"
                 />
               </div>
-            ) : featuredMatch ? (
-              <div className="mt-3">
-                <MatchTeamsDisplay
-                  homeName={featuredMatch.homeTeam.name}
-                  awayName={featuredMatch.awayTeam.name}
-                  homeLogo={featuredMatch.homeTeam.image ?? undefined}
-                  awayLogo={featuredMatch.awayTeam.image ?? undefined}
-                  homeScore={featuredMatch.homeScore}
-                  awayScore={featuredMatch.awayScore}
-                  teamNameClassName="text-base font-semibold text-white"
-                  className="sm:flex-col sm:items-start lg:flex-row lg:items-center"
-                />
-              </div>
             ) : (
               <div className="mt-3">
                 <MatchTeamsDisplay
@@ -153,8 +140,6 @@ export default async function Home() {
                   className="sm:flex-col sm:items-start lg:flex-row lg:items-center"
                 />
               </div>
-            ) : (
-              <p className="mt-3 text-xl font-semibold">Матчі скоро з'являться</p>
             )}
             <p className="mt-2 text-sm leading-6 text-slate-300">
               {editorialLiveMatch
