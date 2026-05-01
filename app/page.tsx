@@ -70,7 +70,11 @@ export default async function Home() {
     championshipSlug: "investec-champions-cup",
     round: "Півфінал",
     homeName: "Leinster Rugby",
+    homeLogo:
+      "https://media-cdn.incrowdsports.com/02ec4396-a5c2-49b2-bd5d-4056277b1278.png?format=webp&width=125",
     awayName: "RC Toulon",
+    awayLogo:
+      "https://media-cdn.incrowdsports.com/c460bc92-ecd2-48d5-9f8e-ae8e12a2ebf4.png?format=webp&width=125",
     date: "2 травня 2026 р. • 17:00 (Київ)",
     status: "upcoming" as const,
   };
@@ -136,6 +140,8 @@ export default async function Home() {
                 <MatchTeamsDisplay
                   homeName={spotlightUpcomingMatch.homeName}
                   awayName={spotlightUpcomingMatch.awayName}
+                  homeLogo={spotlightUpcomingMatch.homeLogo}
+                  awayLogo={spotlightUpcomingMatch.awayLogo}
                   teamNameClassName="text-base font-semibold text-white"
                   className="sm:flex-col sm:items-start lg:flex-row lg:items-center"
                 />
