@@ -65,6 +65,15 @@ export default async function Home() {
   const featuredArticle = articles[0];
   const editorialLiveMatch = getEditorialLiveMatch();
   const featuredMatch = matches[0];
+  const spotlightUpcomingMatch = {
+    championshipTitle: "Investec Champions Cup",
+    championshipSlug: "investec-champions-cup",
+    round: "Півфінал",
+    homeName: "Leinster Rugby",
+    awayName: "RC Toulon",
+    date: "2 травня 2026 р. • 17:00 (Київ)",
+    status: "upcoming" as const,
+  };
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 lg:gap-10 lg:px-8">
@@ -135,6 +144,15 @@ export default async function Home() {
                   className="sm:flex-col sm:items-start lg:flex-row lg:items-center"
                 />
               </div>
+            ) : featuredMatch ? (
+              <div className="mt-3">
+                <MatchTeamsDisplay
+                  homeName={spotlightUpcomingMatch.homeName}
+                  awayName={spotlightUpcomingMatch.awayName}
+                  teamNameClassName="text-base font-semibold text-white"
+                  className="sm:flex-col sm:items-start lg:flex-row lg:items-center"
+                />
+              </div>
             ) : (
               <p className="mt-3 text-xl font-semibold">Матчі скоро з'являться</p>
             )}
@@ -142,14 +160,14 @@ export default async function Home() {
               {editorialLiveMatch
                 ? `${editorialLiveMatch.championshipTitle} • ${editorialLiveMatch.round}`
                 : featuredMatch
-                ? `${featuredMatch.championship.title} • ${featuredMatch.round}`
+                ? `${spotlightUpcomingMatch.championshipTitle} • ${spotlightUpcomingMatch.round}`
                 : "Стежте за оновленнями календаря найближчим часом."}
             </p>
             <p className="mt-2 text-sm text-emerald-200">
               {editorialLiveMatch
                 ? editorialLiveMatch.date
                 : featuredMatch
-                ? formatDateTime(featuredMatch.date)
+                ? spotlightUpcomingMatch.date
                 : ""}
             </p>
             {editorialLiveMatch || featuredMatch ? (
@@ -158,22 +176,22 @@ export default async function Home() {
                   className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
                     editorialLiveMatch
                       ? getMatchStatusClasses("live")
-                      : getMatchStatusClasses(featuredMatch.status)
+                      : getMatchStatusClasses(spotlightUpcomingMatch.status)
                   }`}
                 >
                   {editorialLiveMatch
                     ? getMatchStatusLabel("live")
-                    : getMatchStatusLabel(featuredMatch.status)}
+                    : getMatchStatusLabel(spotlightUpcomingMatch.status)}
                 </span>
                 <Link
                   href={
                     editorialLiveMatch
                       ? `/championships/${editorialLiveMatch.championshipSlug}`
-                      : `/matches/${featuredMatch.id}`
+                      : `/championships/${spotlightUpcomingMatch.championshipSlug}`
                   }
                   className="text-sm font-semibold text-emerald-200 transition-colors hover:text-white"
                 >
-                  {editorialLiveMatch ? "До чемпіонату" : "До матчу"}
+                  До чемпіонату
                 </Link>
               </div>
             ) : null}
