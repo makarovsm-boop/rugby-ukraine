@@ -144,7 +144,7 @@ export default async function Home() {
                   className="sm:flex-col sm:items-start lg:flex-row lg:items-center"
                 />
               </div>
-            ) : featuredMatch ? (
+            ) : (
               <div className="mt-3">
                 <MatchTeamsDisplay
                   homeName={spotlightUpcomingMatch.homeName}
@@ -159,18 +159,14 @@ export default async function Home() {
             <p className="mt-2 text-sm leading-6 text-slate-300">
               {editorialLiveMatch
                 ? `${editorialLiveMatch.championshipTitle} • ${editorialLiveMatch.round}`
-                : featuredMatch
-                ? `${spotlightUpcomingMatch.championshipTitle} • ${spotlightUpcomingMatch.round}`
-                : "Стежте за оновленнями календаря найближчим часом."}
+                : `${spotlightUpcomingMatch.championshipTitle} • ${spotlightUpcomingMatch.round}`}
             </p>
             <p className="mt-2 text-sm text-emerald-200">
               {editorialLiveMatch
                 ? editorialLiveMatch.date
-                : featuredMatch
-                ? spotlightUpcomingMatch.date
-                : ""}
+                : spotlightUpcomingMatch.date}
             </p>
-            {editorialLiveMatch || featuredMatch ? (
+            {editorialLiveMatch || spotlightUpcomingMatch ? (
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <span
                   className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
