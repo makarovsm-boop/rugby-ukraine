@@ -557,9 +557,9 @@ export const championships: Championship[] = [
       },
       {
         round: "3 травня 2026 · півфінал",
-        teams: "Union Bordeaux Bègles vs Bath Rugby",
+        teams: "Union Bordeaux Bègles 38:26 Bath Rugby",
         date: "17:00 (Київ), Stade Atlantique Bordeaux Métropole",
-        location: "Друга офіційна півфінальна пара турніру",
+        location: "Результат півфіналу Investec Champions Cup",
       },
       {
         round: "10 квітня 2026 · чвертьфінал",
@@ -623,9 +623,9 @@ export const championships: Championship[] = [
       },
       {
         round: "3 травня 2026 · півфінал",
-        teams: "Union Bordeaux Bègles vs Bath Rugby",
+        teams: "Union Bordeaux Bègles 38:26 Bath Rugby",
         date: "17:00 (Київ), Stade Atlantique Bordeaux Métropole",
-        location: "Друга офіційна півфінальна пара турніру",
+        location: "Результат півфіналу Investec Champions Cup",
       },
       {
         round: "10 квітня 2026 · чвертьфінал",
