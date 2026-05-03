@@ -56,6 +56,22 @@ function getEditorialLiveMatch() {
   return null;
 }
 
+function getKyivSpotlightStatus() {
+  const kickoffUtcMs = Date.UTC(2026, 4, 3, 14, 0, 0);
+  const liveWindowMs = 3 * 60 * 60 * 1000;
+  const nowMs = Date.now();
+
+  if (nowMs >= kickoffUtcMs && nowMs < kickoffUtcMs + liveWindowMs) {
+    return "live" as const;
+  }
+
+  if (nowMs >= kickoffUtcMs + liveWindowMs) {
+    return "finished" as const;
+  }
+
+  return "upcoming" as const;
+}
+
 export default async function Home() {
   const { articles, championships, teams, matches, results } =
     await getHomePageData();
@@ -76,7 +92,7 @@ export default async function Home() {
     awayLogo:
       "https://media-cdn.incrowdsports.com/f4d9a293-9086-41bf-aa1b-c98d1c62fe3b.png?format=webp&width=125",
     date: "3 травня 2026 р. • 17:00 (Київ)",
-    status: "upcoming" as const,
+    status: getKyivSpotlightStatus(),
   };
 
   return (
