@@ -267,11 +267,15 @@ export default async function ChampionshipPage({
     displayChampionship.slug === "investec-champions-cup" ||
     displayChampionship.slug === "champions-cup";
   const hasGroupTables = groupTables.length > 0;
-  const semifinalPairs = isChampionsCupPlayoffs
-    ? championshipMatchesOverride.filter((match) => match.round.includes("півфінал"))
+  const finalPair = isChampionsCupPlayoffs
+    ? championshipMatchesOverride.filter((match) =>
+        match.round.toLowerCase().includes("фінал (анонс)"),
+      )
     : [];
   const playoffResults = isChampionsCupPlayoffs
-    ? championshipMatchesOverride.filter((match) => !match.round.includes("півфінал"))
+    ? championshipMatchesOverride.filter(
+        (match) => !match.round.toLowerCase().includes("фінал (анонс)"),
+      )
     : championshipMatchesOverride;
   const matchesCount =
     championshipMatchesOverride.length > 0
@@ -354,14 +358,14 @@ export default async function ChampionshipPage({
             </p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950">
               {isChampionsCupPlayoffs
-                ? "Півфінальні пари"
+                ? "Фінальна пара"
                 : hasGroupTables
                   ? "Турнірні групи"
                 : "Поточне становище команд"}
             </h2>
             <p className="mt-3 text-sm text-slate-500">
               {isChampionsCupPlayoffs
-                ? "Замість таблиці для цього турніру показуємо актуальні півфінальні пари плей-оф за офіційною сторінкою EPCR."
+                ? "Замість таблиці для цього турніру показуємо актуальний анонс фіналу, а попередні стадії винесені у результати."
                 : hasGroupTables
                   ? "Офіційний склад пулів Rugby World Cup 2027. До старту турніру всі показники в групах ще нульові."
                 : standingsMessage}
@@ -369,9 +373,9 @@ export default async function ChampionshipPage({
           </div>
 
           {isChampionsCupPlayoffs ? (
-            semifinalPairs.length > 0 ? (
+            finalPair.length > 0 ? (
               <div className="space-y-4">
-                {semifinalPairs.map((match) => (
+                {finalPair.map((match) => (
                   <article
                     key={`${match.round}-${match.teams}`}
                     className="content-card rounded-[1.5rem] p-5"
@@ -420,8 +424,8 @@ export default async function ChampionshipPage({
               </div>
             ) : (
               <FallbackState
-                title="Півфінальні пари поки недоступні"
-                description="Для цього етапу плей-оф ще не додано актуальні пари."
+                title="Фінальну пару поки не додано"
+                description="Для цього етапу плей-оф ще не додано актуальний анонс фіналу."
               />
             )
           ) : hasGroupTables ? (
