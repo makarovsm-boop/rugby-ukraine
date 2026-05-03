@@ -545,14 +545,14 @@ export const championships: Championship[] = [
     matches: [
       {
         round: "2 травня 2026 · півфінал",
-        teams: "Leinster Rugby vs RC Toulon",
-        date: "14:00, Aviva Stadium",
-        location: "Офіційна півфінальна пара Investec Champions Cup",
+        teams: "Leinster Rugby 29:25 RC Toulon",
+        date: "17:00 (Київ), Aviva Stadium",
+        location: "Результат півфіналу Investec Champions Cup",
       },
       {
         round: "3 травня 2026 · півфінал",
         teams: "Union Bordeaux Bègles vs Bath Rugby",
-        date: "14:00, Stade Atlantique Bordeaux Métropole",
+        date: "17:00 (Київ), Stade Atlantique Bordeaux Métropole",
         location: "Друга офіційна півфінальна пара турніру",
       },
       {
@@ -605,14 +605,14 @@ export const championships: Championship[] = [
     matches: [
       {
         round: "2 травня 2026 · півфінал",
-        teams: "Leinster Rugby vs RC Toulon",
-        date: "14:00, Aviva Stadium",
-        location: "Офіційна півфінальна пара Investec Champions Cup",
+        teams: "Leinster Rugby 29:25 RC Toulon",
+        date: "17:00 (Київ), Aviva Stadium",
+        location: "Результат півфіналу Investec Champions Cup",
       },
       {
         round: "3 травня 2026 · півфінал",
         teams: "Union Bordeaux Bègles vs Bath Rugby",
-        date: "14:00, Stade Atlantique Bordeaux Métropole",
+        date: "17:00 (Київ), Stade Atlantique Bordeaux Métropole",
         location: "Друга офіційна півфінальна пара турніру",
       },
       {

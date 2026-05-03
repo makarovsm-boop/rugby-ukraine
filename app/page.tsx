@@ -69,13 +69,13 @@ export default async function Home() {
     championshipTitle: "Investec Champions Cup",
     championshipSlug: "investec-champions-cup",
     round: "Півфінал",
-    homeName: "Leinster Rugby",
+    homeName: "Union Bordeaux Bègles",
     homeLogo:
-      "https://media-cdn.incrowdsports.com/02ec4396-a5c2-49b2-bd5d-4056277b1278.png?format=webp&width=125",
-    awayName: "RC Toulon",
+      "https://media-cdn.cortextech.io/3a3f88b1-d089-4b5a-aece-26469a437790.png?format=webp&width=125",
+    awayName: "Bath Rugby",
     awayLogo:
-      "https://media-cdn.incrowdsports.com/c460bc92-ecd2-48d5-9f8e-ae8e12a2ebf4.png?format=webp&width=125",
-    date: "2 травня 2026 р. • 17:00 (Київ)",
+      "https://media-cdn.incrowdsports.com/f4d9a293-9086-41bf-aa1b-c98d1c62fe3b.png?format=webp&width=125",
+    date: "3 травня 2026 р. • 17:00 (Київ)",
     status: "upcoming" as const,
   };
 

@@ -86,11 +86,18 @@ export function getEditorialMatchCards() {
           buildTeamLogoMap(championship.standings),
         );
         const lowerRound = match.round.toLowerCase();
+        const hasScore =
+          parsedTeams?.homeScore !== null &&
+          parsedTeams?.homeScore !== undefined &&
+          parsedTeams?.awayScore !== null &&
+          parsedTeams?.awayScore !== undefined;
         const status = lowerRound.includes("наживо")
           ? "live"
-          : lowerRound.includes("анонс") || lowerRound.includes("півфінал")
-            ? "upcoming"
-            : "finished";
+          : hasScore
+            ? "finished"
+            : lowerRound.includes("анонс") || lowerRound.includes("півфінал")
+              ? "upcoming"
+              : "finished";
         const championshipSlug = getChampionshipCanonicalSlug({
           slug: championship.slug,
           title: championship.title,
