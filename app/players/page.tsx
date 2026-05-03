@@ -17,24 +17,45 @@ export const metadata: Metadata = {
 
 export default async function PlayersPage() {
   const players = await getPlayers();
+  const spotlightNames = [
+    "Finn Russell",
+    "Antoine Dupont",
+    "Marcus Smith",
+    "Maro Itoje",
+    "Sam Underhill",
+    "Ben Spencer",
+    "Leinster Rugby",
+  ];
+
+  const sortedPlayers = [...players].sort((a, b) => {
+    const aPriority = spotlightNames.some((name) => a.name.includes(name)) ? 0 : 1;
+    const bPriority = spotlightNames.some((name) => b.name.includes(name)) ? 0 : 1;
+
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+
+    return a.name.localeCompare(b.name, "uk");
+  });
+  const featuredPlayers = sortedPlayers.slice(0, 12);
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
       <PageIntro
-        title="Гравці"
-        description="Каталог гравців із короткими редакційними профілями: позиція, базові антропометричні дані, команда і стисла характеристика ролі на полі."
+        title="Гравці у фокусі"
+        description="У цьому розділі показуємо вибраних гравців, за якими варто стежити саме зараз. Повні склади команд доступні на сторінках кожної команди."
       />
 
       <section className="content-card rounded-[1.5rem] p-5 text-sm leading-7 text-slate-600">
         <p>
-          Профілі гравців на сайті мають довідковий характер. Це не офіційні
-          картки клубів і не скаутські звіти, а короткі редакційні описи, які
-          допомагають читачу швидше зрозуміти, хто є хто.
+          Це редакційна добірка гравців, які формують порядок денний найближчих
+          турів і ключових матчів. Для повного списку кожної команди відкрийте
+          розділ «Команди» і перейдіть у потрібний клуб або збірну.
         </p>
       </section>
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {await Promise.all(players.map(async (player, index) => {
+        {await Promise.all(featuredPlayers.map(async (player, index) => {
           const safeImage = await getSafeImagePath(player.image, "players");
 
           return (
