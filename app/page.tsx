@@ -57,7 +57,7 @@ function getEditorialLiveMatch() {
 }
 
 function getKyivSpotlightStatus() {
-  const kickoffUtcMs = Date.UTC(2026, 4, 3, 14, 0, 0);
+  const kickoffUtcMs = Date.UTC(2026, 4, 23, 13, 45, 0);
   const liveWindowMs = 3 * 60 * 60 * 1000;
   const nowMs = Date.now();
 
@@ -84,14 +84,14 @@ export default async function Home() {
   const spotlightUpcomingMatch = {
     championshipTitle: "Investec Champions Cup",
     championshipSlug: "investec-champions-cup",
-    round: "Півфінал",
-    homeName: "Union Bordeaux Bègles",
+    round: "Фінал",
+    homeName: "Leinster Rugby",
     homeLogo:
-      "https://media-cdn.cortextech.io/3a3f88b1-d089-4b5a-aece-26469a437790.png?format=webp&width=125",
-    awayName: "Bath Rugby",
+      "https://media-cdn.incrowdsports.com/02ec4396-a5c2-49b2-bd5d-4056277b1278.png?format=webp&width=125",
+    awayName: "Union Bordeaux Bègles",
     awayLogo:
-      "https://media-cdn.incrowdsports.com/f4d9a293-9086-41bf-aa1b-c98d1c62fe3b.png?format=webp&width=125",
-    date: "3 травня 2026 р. • 17:00 (Київ)",
+      "https://media-cdn.cortextech.io/3a3f88b1-d089-4b5a-aece-26469a437790.png?format=webp&width=125",
+    date: "23 травня 2026 р. • 16:45 (Київ)",
     status: getKyivSpotlightStatus(),
   };
 

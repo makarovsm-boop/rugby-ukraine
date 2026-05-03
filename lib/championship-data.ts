@@ -544,6 +544,12 @@ export const championships: Championship[] = [
     ],
     matches: [
       {
+        round: "23 травня 2026 · фінал (анонс)",
+        teams: "Leinster Rugby vs Union Bordeaux Bègles",
+        date: "16:45 (Київ), San Mamés Stadium",
+        location: "Офіційний анонс фіналу Investec Champions Cup",
+      },
+      {
         round: "2 травня 2026 · півфінал",
         teams: "Leinster Rugby 29:25 RC Toulon",
         date: "17:00 (Київ), Aviva Stadium",
@@ -603,6 +609,12 @@ export const championships: Championship[] = [
       { position: 8, name: "Bristol Bears", logo: "https://media-cdn.incrowdsports.com/714ab764-0396-4c96-80df-4013a723d172.png?format=webp&width=125", played: 4, won: 3, lost: 1, points: 14 },
     ],
     matches: [
+      {
+        round: "23 травня 2026 · фінал (анонс)",
+        teams: "Leinster Rugby vs Union Bordeaux Bègles",
+        date: "16:45 (Київ), San Mamés Stadium",
+        location: "Офіційний анонс фіналу Investec Champions Cup",
+      },
       {
         round: "2 травня 2026 · півфінал",
         teams: "Leinster Rugby 29:25 RC Toulon",
