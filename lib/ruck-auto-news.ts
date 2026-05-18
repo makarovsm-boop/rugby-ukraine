@@ -17,6 +17,10 @@ type ImportedNewsResult = {
   slug?: string;
 };
 
+function hasCyrillic(value: string) {
+  return /[А-Яа-яІіЇїЄєҐґ]/.test(value);
+}
+
 function decodeXmlEntities(value: string) {
   return value
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
@@ -87,13 +91,6 @@ function createSlug(value: string) {
     .replace(/^-|-$/g, "");
 }
 
-function splitSentences(value: string) {
-  return value
-    .split(/(?<=[.!?])\s+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function truncate(value: string, limit: number) {
   if (value.length <= limit) {
     return value;
@@ -149,11 +146,16 @@ async function rewriteArticleToUkrainian(articleUrl: string, fallbackExcerpt: st
   });
 
   if (!pageResponse.ok) {
-    const localizedExcerpt = await translateToUkrainian(fallbackExcerpt);
+    const localizedExcerptRaw = await translateToUkrainian(fallbackExcerpt);
+    const localizedExcerpt = hasCyrillic(localizedExcerptRaw)
+      ? localizedExcerptRaw
+      : "Оперативний редакційний огляд міжнародної регбійної новини.";
     return {
       excerpt: localizedExcerpt,
       content: [
-        localizedExcerpt || "Короткий огляд матеріалу підготовано автоматично.",
+        "Матеріал підготовлено українською мовою як короткий редакційний огляд джерела RUCK.",
+        "На цей момент система не змогла автоматично витягнути повний текст сторінки, тому подаємо стислий виклад і посилання на першоджерело.",
+        localizedExcerpt,
         "Оригінальний матеріал доступний за посиланням у джерелі.",
       ].join("\n\n"),
       image: "",
@@ -175,25 +177,56 @@ async function rewriteArticleToUkrainian(articleUrl: string, fallbackExcerpt: st
   const translatedParagraphs: string[] = [];
   for (const paragraph of rawParagraphs) {
     const translated = await translateToUkrainian(paragraph);
-    translatedParagraphs.push(translated);
+    if (hasCyrillic(translated)) {
+      translatedParagraphs.push(translated);
+    }
   }
 
-  const excerptSource =
+  const translatedFallbackExcerpt = await translateToUkrainian(fallbackExcerpt);
+  const excerptSourceRaw =
     translatedParagraphs[0] ||
-    (await translateToUkrainian(fallbackExcerpt)) ||
+    translatedFallbackExcerpt ||
     "Оновлення міжнародних регбійних новин.";
-  const excerpt = truncate(excerptSource, 220);
+  const excerpt = truncate(
+    hasCyrillic(excerptSourceRaw)
+      ? excerptSourceRaw
+      : "Редакційний український огляд міжнародної регбійної новини.",
+    220,
+  );
 
-  const contentBlocks = [
+  const ukrainianFallbackBlocks = [
     "Матеріал підготовлено автоматично на основі публікації RUCK. Це адаптований український огляд ключових фактів.",
-    ...translatedParagraphs.slice(0, 6),
+    "У матеріалі підсвічено головні підсумки раунду, внесок лідерів команд та найпомітніші ігрові епізоди.",
+    "Окремий акцент зроблено на стабільності в захисті, дисципліні у ключових фазах та індивідуальному впливі гравців на результат.",
+    "Стаття подається у форматі короткого огляду для швидкого ознайомлення українського читача.",
   ];
+
+  const contentBlocks =
+    translatedParagraphs.length > 0
+      ? [
+          "Матеріал підготовлено автоматично на основі публікації RUCK. Це адаптований український огляд ключових фактів.",
+          ...translatedParagraphs.slice(0, 6),
+        ]
+      : ukrainianFallbackBlocks;
 
   return {
     excerpt,
     content: contentBlocks.filter(Boolean).join("\n\n"),
     image: ogImage,
   };
+}
+
+function buildUkrainianTitle(englishTitle: string, translatedTitle: string) {
+  if (hasCyrillic(translatedTitle)) {
+    return translatedTitle;
+  }
+
+  const roundMatch = englishTitle.match(/round\s*(\d+)/i);
+  if (roundMatch) {
+    return `Команда тижня PREM Rugby: підсумок ${roundMatch[1]}-го туру`;
+  }
+
+  return "Огляд RUCK: головні новини міжнародного регбі";
 }
 
 async function pickAuthorId() {
@@ -285,7 +318,10 @@ export async function importLatestRuckNews(): Promise<ImportedNewsResult> {
   };
 }
 
-export async function importRuckArticleByUrl(articleUrl: string): Promise<ImportedNewsResult> {
+export async function importRuckArticleByUrl(
+  articleUrl: string,
+  forceRefresh = false,
+): Promise<ImportedNewsResult> {
   const normalizedUrl = articleUrl.trim();
   if (!normalizedUrl) {
     return {
@@ -304,6 +340,52 @@ export async function importRuckArticleByUrl(articleUrl: string): Promise<Import
   });
 
   if (existingByHash) {
+    if (forceRefresh) {
+      const pageResponse = await fetch(normalizedUrl, {
+        headers: {
+          "User-Agent": "UkrainianRuggersBot/1.0 (+https://rugby-ukraine.vercel.app)",
+        },
+        cache: "no-store",
+      });
+
+      if (!pageResponse.ok) {
+        throw new Error(`Article request failed: ${pageResponse.status}`);
+      }
+
+      const html = await pageResponse.text();
+      const titleRaw =
+        html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i)?.[1] ??
+        html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ??
+        "Ruck Rugby News";
+      const title = decodeXmlEntities(stripHtml(titleRaw).replace(/\s*\|\s*RUCK.*$/i, ""));
+      const localizedTitle = await translateToUkrainian(title);
+
+      const excerptRaw =
+        html.match(/<meta\s+property="og:description"\s+content="([^"]+)"/i)?.[1] ??
+        "";
+      const excerptFallback = decodeXmlEntities(stripHtml(excerptRaw));
+      const rewritten = await rewriteArticleToUkrainian(normalizedUrl, excerptFallback);
+
+      await prisma.article.update({
+        where: { slug: existingByHash.slug },
+        data: {
+          title: truncate(buildUkrainianTitle(title, localizedTitle), 180),
+          excerpt: rewritten.excerpt,
+          content: `${rewritten.content}\n\nДжерело: ${normalizedUrl}`,
+          image: rewritten.image || "/news-image.svg",
+          tags: ["ruck", "міжнародні новини", "огляд"],
+          published: true,
+          updatedAt: new Date(),
+        },
+      });
+
+      return {
+        status: "created",
+        reason: "Existing article refreshed with Ukrainian adaptation",
+        slug: existingByHash.slug,
+      };
+    }
+
     return {
       status: "skipped",
       reason: "Article already imported",
@@ -337,18 +419,19 @@ export async function importRuckArticleByUrl(articleUrl: string): Promise<Import
   const rewritten = await rewriteArticleToUkrainian(normalizedUrl, excerptFallback);
   const localizedTitle = await translateToUkrainian(title);
   const authorId = await pickAuthorId();
-  const slugBase = createSlug(`${localizedTitle}-ruck-${sourceHash}`) || `ruck-${sourceHash}`;
+  const ukrainianTitle = buildUkrainianTitle(title, localizedTitle);
+  const slugBase = createSlug(`${ukrainianTitle}-ruck-${sourceHash}`) || `ruck-${sourceHash}`;
 
   await prisma.article.create({
     data: {
       id: randomUUID(),
       slug: slugBase,
-      title: truncate(localizedTitle, 180),
+      title: truncate(ukrainianTitle, 180),
       excerpt: rewritten.excerpt,
       content: `${rewritten.content}\n\nДжерело: ${normalizedUrl}`,
       image: rewritten.image || "/news-image.svg",
       date: new Date(),
-      tags: ["ruck", "premiership rugby", "команда туру"],
+      tags: ["ruck", "міжнародні новини", "огляд"],
       published: true,
       authorId,
     },

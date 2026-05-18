@@ -30,10 +30,11 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const forceUrl = searchParams.get("url")?.trim();
+  const forceRefresh = searchParams.get("refresh") === "1";
 
   if (forceUrl) {
     try {
-      const result = await importRuckArticleByUrl(forceUrl);
+      const result = await importRuckArticleByUrl(forceUrl, forceRefresh);
       if (result.status === "created") {
         revalidatePath("/");
         revalidatePath("/news");
