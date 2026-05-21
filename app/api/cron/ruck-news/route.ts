@@ -12,7 +12,7 @@ function isAuthorized(request: Request) {
   return authHeader === `Bearer ${secret}`;
 }
 
-function isKyivEightNow() {
+function getKyivHourNow() {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Europe/Kyiv",
     hour: "2-digit",
@@ -20,7 +20,8 @@ function isKyivEightNow() {
   }).formatToParts(new Date());
 
   const hourValue = parts.find((part) => part.type === "hour")?.value ?? "";
-  return hourValue === "08";
+  const hour = Number.parseInt(hourValue, 10);
+  return Number.isFinite(hour) ? hour : null;
 }
 
 export async function GET(request: Request) {
@@ -50,11 +51,14 @@ export async function GET(request: Request) {
     }
   }
 
-  if (!isKyivEightNow()) {
+  const kyivHour = getKyivHourNow();
+  if (kyivHour !== 8) {
     return NextResponse.json({
       ok: true,
       skipped: true,
       reason: "Not 08:00 in Europe/Kyiv",
+      kyivHour,
+      nowUtc: new Date().toISOString(),
     });
   }
 
